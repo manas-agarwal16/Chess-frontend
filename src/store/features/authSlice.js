@@ -1,6 +1,21 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../utils/axiosInstance.js";
 import toast from "react-hot-toast";
+import { data } from "react-router-dom";
+
+export const getCurrentPlayer = createAsyncThunk(
+  "curPlayer",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/players/get-current-player");
+      return response.data;
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Failed to get current player"
+      );
+    }
+  }
+);
 
 export const register = createAsyncThunk(
   "register",
@@ -87,9 +102,37 @@ export const login = createAsyncThunk(
   }
 );
 
+export const logout = createAsyncThunk(
+  "logout",
+  async (data, { rejectWithValue }) => {
+    try {
+      console.log("logout authslice");
+
+      const response = await axiosInstance.get("/players/logout");
+      return response.data;
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Logout failed");
+    }
+  }
+);
+
+export const refreshAccessToken = createAsyncThunk(
+  "refreshAccessToken",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/players/refresh-access-token");
+      return response.data;
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Failed to refresh access token"
+      );
+    }
+  }
+);
+
 const initialState = {
-  loginStatus: false,
-  userData: {},
+  loginStatus: null,
+  playerData: {},
   loading: false,
 };
 
@@ -98,6 +141,33 @@ const authSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    builder
+      .addCase(getCurrentPlayer.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(getCurrentPlayer.fulfilled, (state, action) => {
+        console.log(
+          "getCurrentPlayer action.payload.data",
+          action.payload?.data
+        );
+
+        state.loading = false;
+        if (action.payload?.data?.playerData) {
+          state.playerData = action.payload?.data?.playerData;
+        } else {
+          state.playerData = {};
+        }
+        if (action.payload?.data?.loginStatus) {
+          state.loginStatus = action.payload?.data?.loginStatus;
+        } else {
+          state.loginStatus = false;
+        }
+      })
+      .addCase(getCurrentPlayer.rejected, (state, action) => {
+        console.log("getCurrentPlayer action.error", action.error);
+        state.loading = false;
+      });
+
     builder
       .addCase(register.pending, (state, action) => {
         state.loading = true;
@@ -146,6 +216,19 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         console.log("login reject action.error", action.error);
+        state.loading = false;
+      });
+    builder
+      .addCase(logout.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(logout.fulfilled, (state, action) => {
+        state.loading = false;
+        state.loginStatus = false;
+        state.playerData = {};
+      })
+      .addCase(logout.rejected, (state, action) => {
+        console.log("logout reject action.error", action.error);
         state.loading = false;
       });
   },

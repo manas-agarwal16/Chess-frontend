@@ -1,39 +1,76 @@
-import React from "react";
-import chessImage from "../assets/chess-image.jpg";
-import { Button } from "./index.js";
+import React, { useEffect } from "react";
+import chessImage2 from "../assets/chess-image2.jpg";
+import { Button, CenterSpinner, Heading } from "./index.js";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../store/features/authSlice.js";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { loginStatus, loading } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    console.log("loginStatus:", loginStatus);
+    if (loginStatus === false && !loading) {
+      navigate("/login");
+    }
+  }, [loginStatus, loading, navigate]);
+
+  const handleLogout = () =>{
+    console.log("logout clicked");
+    
+    dispatch(logout());
+  }
+
   return (
-    <div className="flex min-h-screen w-screen">
-      <section className=" min-h-screen w-full p-1 flex-col items-center justify-center">
-        <img
-          className="w-full h-full rounded-xl shawdow-2xl"
-          src="https://cdn.pixabay.com/photo/2017/07/10/09/47/chess-2489553_1280.jpg"
-          alt="chess-image"
-        />
-      </section>
-      <section className="w-full min-h-screen flex flex-col py-4 px-2 items-center justify-between">
-        <div className="flex w-full justify-between items-center">
-          <div></div>
-          <input
-            className="rounded relative left-8 bg-[#FFF8DC] px-2 outline-none py-1 text-lg w-96 focus:outline-gray-500 font-sans"
-            type="text"
-            placeholder="search handle"
-          />
+    <>
+      {loading && <CenterSpinner />}
+      <div className="flex min-h-screen w-screen">
+        <section className=" min-h-screen w-full p-0 flex-col items-center justify-center">
           <img
-            className="rounded-full w-12 h-12 cursor-pointer border-2"
-            src="https://cdn.pixabay.com/photo/2016/03/31/19/56/avatar-1295397_1280.png"
-            alt="profile-image"
+            className="w-full h-full shawdow-2xl"
+            src={chessImage2}
+            alt="chess-image"
           />
-        </div>
-        <h1 className="text-5xl font-bold text-[#BC8F8F]">Chess Master</h1>
-        <div className="flex flex-col items-center justify-center gap-10">
-          <Button className="text-xl" text={"Play with stranger"} />
-          <Button className="text-xl" text={"Play with friend"} />
-        </div>
-        <div></div>
-      </section>
-    </div>
+        </section>
+        <section className="w-full min-h-screen flex flex-col py-4 px-2 items-center justify-between">
+          <div className="flex w-full justify-between items-center">
+            <div></div>
+            <input
+              className="rounded relative left-8 border-gray-600 border-2 bg-[#FFF8DC] px-2 outline-none py-1 text-lg w-96  font-sans"
+              type="text"
+              placeholder="search handle"
+            />
+            <img
+              className="rounded-full w-12 h-12 cursor-pointer border-2"
+              src="https://cdn.pixabay.com/photo/2016/03/31/19/56/avatar-1295397_1280.png"
+              alt="profile-image"
+            />
+          </div>
+          <Heading />
+          <div className="flex flex-col items-center justify-center gap-10">
+            <Button
+              className="text-xl border-2 border-[#F4A460]"
+              text={"Play with stranger"}
+            />
+            <Button
+              className="text-xl border-2 border-[#BC8F8F]"
+              text={"Play with friend"}
+            />
+            {/* <p>{loginStatus ? "yes" : "no"}</p> */}
+          </div>
+          <div>
+            <Button
+              onClick={handleLogout}
+              className="text-xl border-2 w-48 bg-[#BC8F8F] not-italic  border-[#BC8F8F]"
+              text={"Logout"}
+            />
+          </div>
+        </section>
+      </div>
+    </>
   );
 };
 

@@ -6,5 +6,6 @@ import Login from "./Login";
 import Register from "./Register";
 import CenterSpinner from "./CenterSpinner";
 import VerifyOTP from "./VerifyOTP";
+import Heading from "./Heading";
 
-export {Home, ChessGame , Button , Input , Login , Register , CenterSpinner , VerifyOTP};
+export {Home, ChessGame , Button , Input , Login , Register , CenterSpinner , VerifyOTP , Heading};

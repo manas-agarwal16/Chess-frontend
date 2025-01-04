@@ -1,10 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import { Outlet, useNavigate } from "react-router-dom";
 import { socket } from "./main.jsx";
+import { useDispatch } from "react-redux";
+import { getCurrentPlayer , refreshAccessToken } from "./store/features/authSlice.js";
 
 const App = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    (async () => {
+      const res = await dispatch(getCurrentPlayer());
+      console.log("res.payload : ", res.payload);
+      if (!res.payload) {
+        const refreshRes = await dispatch(refreshAccessToken());
+        // console.log("res.payload of refreshAccessToken : ", refreshRes);
+
+        if (refreshRes.payload) {
+          dispatch(getCurrentUser());
+        }
+      }
+    })();
+  }, [dispatch]);
 
   const [id, setId] = useState(6);
 
@@ -31,7 +49,7 @@ const App = () => {
 
   return (
     <div className="bg-[#DEB887]">
-      <Outlet/>
+      <Outlet />
     </div>
   );
 };

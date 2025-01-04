@@ -1,9 +1,9 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, CenterSpinner, Input } from "./index.js";
+import { Button, CenterSpinner, Input, Heading } from "./index.js";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { login } from "../store/features/authSlice.js";
+import { login as loginPlayer } from "../store/features/authSlice.js";
 import { Link } from "react-router-dom";
 const Login = () => {
   const dispatch = useDispatch();
@@ -19,7 +19,7 @@ const Login = () => {
 
   const login = async (data) => {
     console.log(data);
-    const res = await dispatch(login(data));
+    const res = await dispatch(loginPlayer(data));
     reset();
     if (res?.payload?.data) {
       navigate("/");
@@ -28,15 +28,15 @@ const Login = () => {
 
   return (
     <div className="flex min-h-screen w-screen">
-      <section className="min-h-screen w-full p-3 flex-col items-center justify-center">
+      <section className="min-h-screen w-full flex-col items-center justify-center">
         <img
-          className="w-full h-full rounded-lg shadow-lg"
+          className="w-full h-full shadow-lg"
           src="https://cdn.pixabay.com/photo/2024/02/17/17/20/chess-8579843_1280.jpg"
           alt="chess-image"
         />
       </section>
       <section className="w-full min-h-screen flex flex-col px-6 items-center justify-between">
-        <h1 className="text-5xl font-bold pt-4 text-[#BC8F8F]">Chess Master</h1>
+        <Heading />
         {loading && <CenterSpinner width={40} />}
         <div className="flex justify-center items-center h-full mx-auto w-full px-4 pt-2 text-white">
           <div className="p-4 pb-3 border-[2px] rounded-lg shadow-md text-white max-w-2xl w-full">
@@ -105,7 +105,6 @@ const Login = () => {
               <Button
                 type="submit"
                 text={"Login"}
-                bgColor="focus:outline-none focus:ring-2"
                 className="w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm"
               />
             </form>

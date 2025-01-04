@@ -34,7 +34,7 @@ const router = createBrowserRouter([
 ]);
 
 export const socket = io(import.meta.env.VITE_SERVER_URL);
-console.log("socket", socket);
+console.log("socket", socket); 
 
 socket.on("connect", () => {
   console.log("connected");
