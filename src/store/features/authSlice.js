@@ -212,7 +212,7 @@ const authSlice = createSlice({
         console.log("action.payload", action.payload);
         state.loading = false;
         state.loginStatus = true;
-        state.userData = action.payload;
+        state.playerData = action.payload.data.playerData;
       })
       .addCase(login.rejected, (state, action) => {
         console.log("login reject action.error", action.error);

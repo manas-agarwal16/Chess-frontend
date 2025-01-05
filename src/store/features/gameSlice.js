@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { set } from "react-hook-form";
 
 const initialState = {
-  loading: null,
+  gameLoading: null,
   color: null,
   opponent: {},
   player: {},
@@ -14,7 +14,8 @@ const gameSlice = createSlice({
   initialState,
   reducers: {
     setGameLoading: (state, action) => {
-      state.loading = action.payload;
+      console.log("action.payload", action.payload);
+      state.gameLoading = action.payload;
     },
     setGameColor: (state, action) => {
       state.color = action.payload;

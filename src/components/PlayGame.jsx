@@ -3,25 +3,33 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { CenterSpinner } from "./index.js";
-import {
-  setGameLoading,
-  setInGame,
-  setGameColor,
-  setOpponent,
-  setPlayer,
-} from "../store/features/gameSlice.js";
+import { Chessboard } from "react-chessboard";
+import { Chess } from "chess.js";
 
 const PlayGame = () => {
-  const socket = useMemo(() => io(import.meta.env.VITE_BACKEND_URL), []);
+  const socket = useMemo(
+    () =>
+      io(import.meta.env.VITE_BACKEND_URL, {
+        autoConnect: false,
+        reconnection: false,
+      }),
+    []
+  );
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const chess = new Chess();
+
+  const [game, setGame] = useState(chess.fen());
 
   const { loginStatus, playerData, loading } = useSelector(
     (state) => state.auth
   );
-  const { gameLoading, color, player, opponent, inGame } = useSelector(
-    (state) => state.game
-  );
+
+  const [isGameLoading, setIsGameLoading] = useState(true);
+  const [isInGame, setIsInGame] = useState(false);
+  const [color, setColor] = useState(null);
+  const [you, setYou] = useState({});
+  const [opponent, setOpponent] = useState({});
 
   const [isProcessOngoing, setIsProcessOngoing] = useState(true);
 
@@ -34,28 +42,41 @@ const PlayGame = () => {
     }
   });
 
-  function showCustomWarning() {
-    if (isProcessOngoing) {
-      const userConfirmed = confirm(
-        "A process is ongoing. Are you sure you want to leave this page?"
-      );
-      if (userConfirmed) {
-        setIsProcessOngoing(false); // Allow navigation
-        window.location.href = "http://localhost:5173"; // Navigate away
-      }
-    }
-  }
+  console.log("loginStatus : ", loginStatus);
+  console.log("playerData : ", playerData);
 
-  // console.log("loginStatus : ", loginStatus);
-  // console.log("playerData : ", playerData);
+  const requestFullscreen = () => {
+    const doc = document.documentElement;
+
+    if (doc.requestFullscreen) {
+      doc.requestFullscreen();
+    } else if (doc.mozRequestFullScreen) {
+      // Firefox
+      doc.mozRequestFullScreen();
+    } else if (doc.webkitRequestFullscreen) {
+      // Chrome, Safari, and Opera
+      doc.webkitRequestFullscreen();
+    } else if (doc.msRequestFullscreen) {
+      // IE/Edge
+      doc.msRequestFullscreen();
+    }
+  };
 
   useEffect(() => {
     if (loginStatus === false && !loading) {
       navigate("/login");
     }
     if (loginStatus === true && loading === false) {
+      requestFullscreen();
+      // alert('Reloading page might exit you from the game.')
+      socket.connect();
+
       socket.on("connect", () => {
         console.log("socket connected");
+      });
+
+      socket.on("disconnect", () => {
+        socket.emit("userDisconnected", playerData.id);
       });
 
       socket.emit("playWithStranger", playerData.id);
@@ -70,49 +91,55 @@ const PlayGame = () => {
       });
 
       //clear
-      socket.on("startTheGame", (players) => {
+      socket.on("startTheGame", async (players) => {
         console.log("player1 : ", players.player1);
         console.log("player2 : ", players.player2);
 
-        dispatch(setGameLoading(false));
-        dispatch(setInGame(true));
-        dispatch(setGameColor(true));
-        dispatch(
-          setPlayer(
-            playerData.id === players.player1.id
-              ? players.player1
-              : players.player2
-          )
+        setIsInGame(true);
+        setColor(
+          players.player1.id === playerData.id
+            ? players.player1.color
+            : players.player2.color
         );
-
-        dispatch(
-          setOpponent(
-            playerData.id === players.player1.id
-              ? players.player2
-              : players.player1
-          )
+        setYou(
+          players.player1.id === playerData.id
+            ? players.player1
+            : players.player2
         );
-
-        if (loading === false) {
-          console.log("gameLoading : ", gameLoading);
-          console.log("color : ", color);
-          console.log("player : ", player);
-          console.log("opponent : ", opponent);
-          console.log("inGame : ", inGame);
-        }
+        setOpponent(
+          players.player1.id === playerData.id
+            ? players.player2
+            : players.player1
+        );
+        setIsGameLoading(false);
 
         //if getCurrentPlayer is player1 then playerColor = player1.color in socketSlice else playerColor = player2.color.
 
         // navigate("/play");
       });
+
+      return () => {
+        console.log("cleanup");
+        socket.disconnect();
+        socket.emit("userDisconnected", playerData.id);
+      };
     }
   }, [loginStatus, loading, navigate]);
 
   return (
-    <>
+    <div className="min-h-screen min-w-screen flex flex-col items-center justify-center">
       {loading && <CenterSpinner />}
-      <h1>Play Game</h1>
-    </>
+      {isGameLoading && <p>Waiting for a player to join</p>}
+      {!loading && !isGameLoading && (
+        <div className="w-[500px] h-[500px] mx-auto border-2 border-red-500">
+          <Chessboard
+            position={game}
+            boardOrientation={color}
+            className="w-full h-full"
+          />
+        </div>
+      )}
+    </div>
   );
 };
 
