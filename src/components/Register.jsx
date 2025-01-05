@@ -47,7 +47,7 @@ const Register = () => {
   <section className="min-h-screen w-full flex-col items-center justify-center">
     <img
       className="w-full h-full shadow-lg"
-      src="https://cdn.pixabay.com/photo/2024/02/17/17/20/chess-8579843_1280.jpg"
+      src={chessImage}
       alt="chess-image"
     />
   </section>

@@ -1,5 +1,5 @@
 import axios from 'axios';
-const BACKENDURL = import.meta.env.VITE_SERVER_URL;
+const BACKENDURL = import.meta.env.VITE_BACKEND_URL;
 
 const axiosInstance = axios.create();
 

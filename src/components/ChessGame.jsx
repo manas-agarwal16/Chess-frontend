@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { use } from "react";
 import { Chessboard } from "react-chessboard";
 import { useSelector } from "react-redux";
-import { socket } from "../main.jsx";
+// import { socket } from "../main.jsx";
 
 const ChessGame = () => {
   

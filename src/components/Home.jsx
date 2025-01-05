@@ -9,20 +9,31 @@ const Home = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { loginStatus, loading } = useSelector((state) => state.auth);
+  const { loginStatus, loading , playerData } = useSelector((state) => state.auth);
 
   useEffect(() => {
     console.log("loginStatus:", loginStatus);
+    console.log('playerData : ', playerData);
+    
     if (loginStatus === false && !loading) {
       navigate("/login");
     }
   }, [loginStatus, loading, navigate]);
 
-  const handleLogout = () =>{
+  const handleLogout = () => {
     console.log("logout clicked");
-    
+
     dispatch(logout());
-  }
+  };
+
+  const handlePlayWithStranger = () => {
+    console.log("play with stranger clicked");
+    navigate("/play-game");
+  };
+
+  const handlePlayWithFriend = () => {
+    console.log("play with friend clicked");
+  };
 
   return (
     <>
@@ -52,10 +63,12 @@ const Home = () => {
           <Heading />
           <div className="flex flex-col items-center justify-center gap-10">
             <Button
+              onClick={handlePlayWithStranger}
               className="text-xl border-2 border-[#F4A460]"
               text={"Play with stranger"}
             />
             <Button
+              onClick={handlePlayWithFriend}
               className="text-xl border-2 border-[#BC8F8F]"
               text={"Play with friend"}
             />

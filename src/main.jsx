@@ -2,9 +2,8 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import { io } from "socket.io-client";
 import { Provider } from "react-redux";
-import { Home, Login, Register , VerifyOTP } from "./pages/index.js";
+import { Home, Login, Register, VerifyOTP , PlayGame } from "./pages/index.js";
 import store from "./store/store.js";
 import { Toaster } from "react-hot-toast";
 
@@ -26,19 +25,16 @@ const router = createBrowserRouter([
         element: <Register />,
       },
       {
-        path: 'verify-otp/:email',
+        path: "verify-otp/:email",
         element: <VerifyOTP />,
-      }
+      },
+      {
+        path: "play-game",
+        element: <PlayGame />,
+      },
     ],
   },
 ]);
-
-export const socket = io(import.meta.env.VITE_SERVER_URL);
-console.log("socket", socket); 
-
-socket.on("connect", () => {
-  console.log("connected");
-});
 
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>

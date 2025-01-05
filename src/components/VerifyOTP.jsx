@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { login, resendOTP, verifyOTP } from "../store/features/authSlice";
 import { useForm } from "react-hook-form";
 import { Button, Input, CenterSpinner , Heading } from "./index";
+import chessImage from "../assets/chess-image.jpg";
 
 const VerifyOTP = () => {
   const { loading } = useSelector((state) => state.auth);
@@ -45,7 +46,7 @@ const VerifyOTP = () => {
       <section className="min-h-screen w-full flex-col items-center justify-center">
         <img
           className="w-full h-full shadow-lg"
-          src="https://cdn.pixabay.com/photo/2024/02/17/17/20/chess-8579843_1280.jpg"
+          src={chessImage}
           alt="chess-image"
         />
       </section>
