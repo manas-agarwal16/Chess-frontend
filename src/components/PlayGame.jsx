@@ -127,12 +127,13 @@ const PlayGame = () => {
   }, [loginStatus, loading, navigate]);
 
   return (
-    <div className="min-h-screen min-w-screen flex flex-col items-center justify-center">
+    <div className="h-screen w-screen flex flex-col items-center justify-center">
       {loading && <CenterSpinner />}
       {isGameLoading && <p>Waiting for a player to join</p>}
       {!loading && !isGameLoading && (
-        <div className="w-[500px] h-[500px] mx-auto border-2 border-red-500">
+        <div className="w-[350px] h-[350px] lg:w-[450px] lg:h-[450px] xl:w-[550px] xl:h-[550px] p-4 mx-auto border-2 border-red-600">
           <Chessboard
+            id="PlayVsRandom"
             position={game}
             boardOrientation={color}
             className="w-full h-full"

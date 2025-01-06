@@ -7,6 +7,6 @@ import Register from "./Register";
 import CenterSpinner from "./CenterSpinner";
 import VerifyOTP from "./VerifyOTP";
 import Heading from "./Heading";
-import PlayGame from "./playGame";
+import PlayGame from "./PlayGame.jsx";
 
 export {Home, ChessGame , Button , Input , Login , Register , CenterSpinner , VerifyOTP , Heading , PlayGame};
