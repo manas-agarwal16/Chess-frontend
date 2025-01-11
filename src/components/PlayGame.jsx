@@ -5,6 +5,7 @@ import { io } from "socket.io-client";
 import { CenterSpinner } from "./index.js";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
+import { set } from "react-hook-form";
 
 const PlayGame = () => {
   const socket = useMemo(
@@ -17,9 +18,8 @@ const PlayGame = () => {
   );
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const chess = new Chess();
 
-  const [game, setGame] = useState(chess.fen());
+  const [game, setGame] = useState(new Chess());
 
   const { loginStatus, playerData, loading } = useSelector(
     (state) => state.auth
@@ -34,97 +34,119 @@ const PlayGame = () => {
   const [isProcessOngoing, setIsProcessOngoing] = useState(true);
 
   // Add an event listener for the beforeunload event
-  window.addEventListener("beforeunload", (event) => {
-    if (isProcessOngoing) {
-      // Show a confirmation dialog
-      event.preventDefault();
-      event.returnValue = ""; // Required for most modern browsers
-    }
-  });
+  // window.addEventListener("beforeunload", (event) => {
+  //   if (isProcessOngoing) {
+  //     // Show a confirmation dialog
+  //     event.preventDefault();
+  //     event.returnValue = ""; // Required for most modern browsers
+  //   }
+  // });
 
   console.log("loginStatus : ", loginStatus);
   console.log("playerData : ", playerData);
 
-  const requestFullscreen = () => {
-    const doc = document.documentElement;
+  // const requestFullscreen = () => {
+  //   const doc = document.documentElement;
 
-    if (doc.requestFullscreen) {
-      doc.requestFullscreen();
-    } else if (doc.mozRequestFullScreen) {
-      // Firefox
-      doc.mozRequestFullScreen();
-    } else if (doc.webkitRequestFullscreen) {
-      // Chrome, Safari, and Opera
-      doc.webkitRequestFullscreen();
-    } else if (doc.msRequestFullscreen) {
-      // IE/Edge
-      doc.msRequestFullscreen();
-    }
-  };
+  //   if (doc.requestFullscreen) {
+  //     doc.requestFullscreen();
+  //   } else if (doc.mozRequestFullScreen) {
+  //     // Firefox
+  //     doc.mozRequestFullScreen();
+  //   } else if (doc.webkitRequestFullscreen) {
+  //     // Chrome, Safari, and Opera
+  //     doc.webkitRequestFullscreen();
+  //   } else if (doc.msRequestFullscreen) {
+  //     // IE/Edge
+  //     doc.msRequestFullscreen();
+  //   }
+  // };
 
   useEffect(() => {
     if (loginStatus === false && !loading) {
       navigate("/login");
     }
     if (loginStatus === true && loading === false) {
-      requestFullscreen();
-      // alert('Reloading page might exit you from the game.')
+      // requestFullscreen();
+
       socket.connect();
-
-      socket.on("connect", () => {
-        console.log("socket connected");
-      });
-
-      socket.on("disconnect", () => {
-        socket.emit("userDisconnected", playerData.id);
-      });
-
-      socket.emit("playWithStranger", playerData.id);
-
-      socket.on("error", (error) => {
-        console.log("error : ", error);
-      });
-
-      //clear
-      socket.on("WaitingForAPlayer", () => {
-        console.log("Waiting for a player to join");
-      });
-
-      //clear
-      socket.on("startTheGame", async (players) => {
-        console.log("player1 : ", players.player1);
-        console.log("player2 : ", players.player2);
-
-        setIsInGame(true);
-        setColor(
-          players.player1.id === playerData.id
-            ? players.player1.color
-            : players.player2.color
-        );
-        setYou(
-          players.player1.id === playerData.id
-            ? players.player1
-            : players.player2
-        );
-        setOpponent(
-          players.player1.id === playerData.id
-            ? players.player2
-            : players.player1
-        );
-        setIsGameLoading(false);
-
-        //if getCurrentPlayer is player1 then playerColor = player1.color in socketSlice else playerColor = player2.color.
-
-        // navigate("/play");
-      });
 
       return () => {
         console.log("cleanup");
-        socket.disconnect();
         socket.emit("userDisconnected", playerData.id);
+        socket.disconnect();
       };
     }
   }, [loginStatus, loading, navigate]);
+
+  //fixed, ander hi rahega playWithStranger
+  socket.on("connect", () => {
+    console.log("socket connected");
+    socket.emit("playWithStranger", playerData.id);
+  });
+
+  socket.on("disconnect", () => {
+    socket.emit("userDisconnected", playerData.id);
+  });
+
+  socket.on("error", (error) => {
+    console.log("error : ", error);
+  });
+
+  //clear
+  socket.on("WaitingForAPlayer", (roomName) => {
+    console.log("Waiting for a player to join: ", roomName);
+  });
+
+  //clear
+  socket.on("startTheGame", async (players) => {
+    console.log("roomName : ", players.roomName);
+    console.log("player1 : ", players.player1);
+    console.log("player2 : ", players.player2);
+
+    setIsInGame(true);
+    setColor(
+      players.player1.id === playerData.id
+        ? players.player1.color
+        : players.player2.color
+    );
+    setYou(
+      players.player1.id === playerData.id ? players.player1 : players.player2
+    );
+    setOpponent(
+      players.player1.id === playerData.id ? players.player2 : players.player1
+    );
+    setIsGameLoading(false);
+
+    //if getCurrentPlayer is player1 then playerColor = player1.color in socketSlice else playerColor = player2.color.
+
+    // navigate("/play");
+  });
+
+  const onDrop = (sourceSquare, targetSquare, piece) => {
+    console.log("sourceSquare : ", sourceSquare);
+    console.log("targetSquare : ", targetSquare);
+    console.log("piece : ", piece);
+
+    console.log("game : ", game);
+
+    const move = game.move({
+      from: sourceSquare,
+      to: targetSquare,
+      promotion: game._turn == "w" ? "Q" : "q", // always promote to a queen for example simplicity
+    });
+
+    if (move === null) {
+      console.log("invalid move");
+      return;
+    }
+    setGame(new Chess(game.fen()));
+
+    socket.emit("newChessPosition", gameCopy);
+    // socket.on("makeMove", () => {
+    //   setGame(chess.fen());
+    // });
+  };
 
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center">
@@ -134,7 +156,8 @@ const PlayGame = () => {
         <div className="w-[350px] h-[350px] lg:w-[450px] lg:h-[450px] xl:w-[550px] xl:h-[550px] p-4 mx-auto border-2 border-red-600">
           <Chessboard
             id="PlayVsRandom"
-            position={game}
+            position={game.fen()}
+            onPieceDrop={onDrop}
             boardOrientation={color}
             className="w-full h-full"
           />
