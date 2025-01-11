@@ -158,22 +158,28 @@ const PlayGame = () => {
 
     const gameCopy = new Chess(game.fen());
     console.log("game : ", gameCopy.fen());
-    const move = gameCopy.move({
-      from: sourceSquare,
-      to: targetSquare,
-      // promotion: gameCopy._turn == "w" ? "Q" : "q", // always promote to a queen for example simplicity
-    });
 
-    console.log("move : ", move);
+    try {
+      const move = gameCopy.move({
+        from: sourceSquare,
+        to: targetSquare,
+        // promotion: gameCopy._turn == "w" ? "Q" : "q", // always promote to a queen for example simplicity
+      });
 
-    if (move === null) {
-      console.log("invalid move");
-      setGame(game);
+      console.log("move : ", move);
+
+      if (move === null) {
+        console.log("invalid move");
+        // setGame(game);
+        return false;
+      }
+
+      socket.emit("newChessPosition", { position: gameCopy.fen(), roomName });
+      return true;
+    } catch (error) {
+      console.log("invalid move : ", error);
       return false;
     }
-
-    socket.emit("newChessPosition", { position: gameCopy.fen(), roomName });
-    return true;
   };
   socket.on("makeMove", (newPosition) => {
     console.log("new position : ", newPosition);
