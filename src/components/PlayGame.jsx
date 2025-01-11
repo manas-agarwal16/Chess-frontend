@@ -163,7 +163,7 @@ const PlayGame = () => {
       const move = gameCopy.move({
         from: sourceSquare,
         to: targetSquare,
-        // promotion: gameCopy._turn == "w" ? "Q" : "q", // always promote to a queen for example simplicity
+        promotion: piece[1].toLowerCase() ?? "q", // always promote to a queen for example simplicity
       });
 
       console.log("move : ", move);
