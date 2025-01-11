@@ -156,6 +156,12 @@ const PlayGame = () => {
     console.log("targetSquare : ", targetSquare);
     console.log("piece : ", piece);
 
+    let pieceColor = piece[0] == 'w'  ? 'white' : 'black';
+
+    if(pieceColor !== color){
+      return false;
+    }
+
     const gameCopy = new Chess(game.fen());
     console.log("game : ", gameCopy.fen());
 
