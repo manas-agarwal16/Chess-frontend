@@ -27,7 +27,6 @@ const PlayGame = () => {
   );
 
   const [isGameLoading, setIsGameLoading] = useState(true);
-  const [isInGame, setIsInGame] = useState(false);
   const [color, setColor] = useState(null);
   const [you, setYou] = useState({});
   const [opponent, setOpponent] = useState({});
@@ -37,6 +36,7 @@ const PlayGame = () => {
   const [roomName, setRoomName] = useState(null);
   const [checkmate, setCheckmate] = useState(false);
   const [draw, setDraw] = useState(false);
+  const [gameLoading, setGameLoading] = useState(false);
 
   // Add an event listener for the beforeunload event
   // window.addEventListener("beforeunload", (event) => {
@@ -110,7 +110,6 @@ const PlayGame = () => {
     console.log("player2 : ", players.player2);
 
     setRoomName(() => players.roomName);
-    setIsInGame(() => true);
     setColor(() =>
       players.player1.id === playerData.id
         ? players.player1.color
@@ -125,6 +124,7 @@ const PlayGame = () => {
     setIsGameLoading(() => false);
   });
 
+  //playersInfo to backend when game starts;
   useEffect(() => {
     if (
       roomName !== null &&
@@ -212,11 +212,12 @@ const PlayGame = () => {
     setGame(() => new Chess(newPosition));
   });
 
-  //game over- checkmate or draw./
+  //game over- checkmate or draw to backend./
   useEffect(() => {
     console.log("checkmate : ", game.isCheckmate());
 
     if (game.isCheckmate()) {
+      setGameLoading(() => true);
       let winnerId, losserId;
       if (game._turn === color[0]) {
         winnerId = opponent.id;
@@ -242,12 +243,13 @@ const PlayGame = () => {
       game.isThreefoldRepetition() ||
       game.isInsufficientMaterial()
     ) {
+      setGameLoading(() => true);
       setStatus(() => "Draw");
       socket.emit("draw", { roomName });
     }
   }, [game]);
 
-  // on checkmate
+  // backend itsCheckmate
   socket.on(
     "itsCheckmate",
     ({
@@ -279,10 +281,12 @@ const PlayGame = () => {
 
       console.log("disconnected");
       socket.emit("userDisconnected", playerData.id);
+      setGameLoading(() => false);
       socket.disconnect();
     }
   );
 
+  //backend itsDraw
   socket.on(
     "itsDraw",
     ({
@@ -314,130 +318,70 @@ const PlayGame = () => {
       setDraw(() => true);
 
       socket.emit("userDisconnected", playerData.id);
+      setGameLoading(() => false);
       socket.disconnect();
     }
   );
 
   return (
     <>
+      {gameLoading && <CenterSpinner />}
       {(checkmate || draw) && (
         <>
-          <div className="h-screen w-full border-2 border-black flex items-center justify-center bg-gray-100">
-            <div className="border-2 flex flex-col items-center justify-center">
-              <span>{you.handle}</span>
-              <span>Your Rating Before: {you.rating}</span>
-              <span>Your Rating Now: {youNewRatinng}</span>
-              <span>{status}</span>
+          <div className="h-screen bg- w-full border-4 border-gray-700 flex items-center justify-center">
+            {/* Player Info Section */}
+            <div className="flex flex-col items-center justify-center space-y-6 p-6 bg-gray-300 shadow-lg rounded-lg w-1/3">
+              <div className="flex flex-col items-center space-y-2">
+                <span className="text-xl font-bold text-gray-800">
+                  {you.handle}
+                </span>
+                <span className="text-lg text-gray-600">
+                  Rating Before: {you.rating}
+                </span>
+                <span className="text-lg text-gray-600">
+                  Rating Now: {youNewRatinng}
+                </span>
+                <span className="text-2xl text-gray-800 font-semibold">
+                  {status}
+                </span>
+              </div>
+              <div className="w-full bg-gray-300 h-1 rounded-md"></div>
+              <div
+                onClick={() => navigate("/")}
+                className="flex items-center justify-center bg-blue-500 text-white rounded-md py-2 px-4 w-full text-center cursor-pointer hover:bg-blue-600"
+              >
+                <span>Return Home</span>
+              </div>
             </div>
-            <div className="border-2 border-red-500">Home</div>
-            <div className="border-2 flex flex-col items-center justify-center">
-              <span>{opponent.handle}</span>
-              <span>
-                {opponent.handle} Rating Before: {opponent.rating}
-              </span>
-              <span>
-                {opponent.handle} Rating Now: {opponentNewRating}
-              </span>
-              <span>
-                {status === "Draw" ? "Draw" : status === "Won" ? "Loss" : "Won"}
-              </span>
+
+            {/* Divider (Chessboard Look) */}
+            <div className="mx-8 bg-gray-400 h-80 w-0.5"></div>
+
+            {/* Opponent Info Section */}
+            <div className="flex flex-col items-center justify-center space-y-6 p-6 bg-white shadow-lg rounded-lg w-1/3">
+              <div className="flex flex-col items-center space-y-2">
+                <span className="text-xl font-bold text-gray-800">
+                  {opponent.handle}
+                </span>
+                <span className="text-lg text-gray-600">
+                  Rating Before: {opponent.rating}
+                </span>
+                <span className="text-lg text-gray-600">
+                  Rating Now: {opponentNewRating}
+                </span>
+                <span className="text-2xl text-gray-800 font-semibold">
+                  {status === "Draw"
+                    ? "Draw"
+                    : status === "Won"
+                    ? "Loss"
+                    : "Won"}
+                </span>
+              </div>
+              <div className="w-full bg-gray-300 h-1 rounded-md"></div>
             </div>
           </div>
         </>
       )}
-      {/* {checkmate && game._turn === color[0] && (
-        <div className="h-screen flex items-center justify-center bg-gray-100">
-          <div className="text-center p-8 bg-white rounded-lg shadow-lg w-96">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Game Over</h2>
-            <div className="flex justify-center mb-6">
-              <div className="w-24 h-24 flex items-center justify-center bg-red-500 text-white rounded-full">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className="w-12 h-12"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </div>
-            </div>
-            <p className="text-lg text-gray-700">You lost the game!</p>
-            <div className="mt-6">
-              <button className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition">
-                Try Again
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {checkmate && game._turn !== color[0] && (
-        <div className="h-screen flex items-center justify-center bg-gray-100">
-          <div className="text-center p-8 bg-white rounded-lg shadow-lg w-96">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Game Over</h2>
-            <div className="flex justify-center mb-6">
-              <div className="w-24 h-24 flex items-center justify-center bg-green-500 text-white rounded-full">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className="w-12 h-12"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-            </div>
-            <p className="text-lg text-gray-700">You won the game!</p>
-            <div className="mt-6">
-              <button className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition">
-                Play Again
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {draw && (
-        <div className="h-screen flex items-center justify-center bg-gray-100">
-          <div className="text-center p-8 bg-white rounded-lg shadow-lg w-96">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Game Over</h2>
-            <div className="flex justify-center mb-6">
-              <div className="w-24 h-24 flex items-center justify-center bg-yellow-500 text-white rounded-full">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className="w-12 h-12"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 9v6m3-3H9"
-                  />
-                </svg>
-              </div>
-            </div>
-            <p className="text-lg text-gray-700">The game is a draw!</p>
-            <div className="mt-6">
-              <button className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition">
-                Play Again
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
 
       {!checkmate && !draw && (
         <div className="h-screen w-screen flex flex-col items-center justify-center">
