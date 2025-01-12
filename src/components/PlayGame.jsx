@@ -158,31 +158,6 @@ const PlayGame = () => {
     }
   }, [roomName]);
 
-  // const onDrop = (sourceSquare, targetSquare, piece) => {
-  //   console.log("sourceSquare : ", sourceSquare);
-  //   console.log("targetSquare : ", targetSquare);
-  //   console.log("piece : ", piece);
-
-  //   const gameCopy = new Chess(game.fen());
-
-  //   const move = gameCopy.move({
-  //     from: sourceSquare,
-  //     to: targetSquare,
-  //     promotion: game._turn == "w" ? "Q" : "q", // always promote to a queen for example simplicity
-  //   });
-
-  //   if (move === null) {
-  //     console.log("invalid move");
-  //     return;
-  //   }
-  //   socket.emit("newChessPosition", { position: gameCopy.fen(), roomName });
-  //   socket.on("makeMove", (newPosition) => {
-  //     console.log("new position : ", newPosition);
-  //     setPosition(newPosition);
-  //     setGame(new Chess(newPosition));
-  //   });
-  // };
-
   const onDrop = (sourceSquare, targetSquare, piece) => {
     console.log("sourceSquare : ", sourceSquare);
     console.log("targetSquare : ", targetSquare);
@@ -226,6 +201,7 @@ const PlayGame = () => {
       return false;
     }
   };
+
   socket.on("makeMove", (newPosition) => {
     console.log("new position : ", newPosition);
     setPosition(() => newPosition);
@@ -236,31 +212,73 @@ const PlayGame = () => {
     console.log("checkmate : ", game.isCheckmate());
 
     if (game.isCheckmate()) {
-      socket.emit("checkmate", roomName);
+      let winnerId, losserId;
+      if (game._turn === color[0]) {
+        winnerId = opponent.id;
+        losserId = you.id;
+      } else {
+        winnerId = you.id;
+        losserId = opponent.id;
+      }
+      console.log(
+        "roomName : ",
+        roomName,
+        "winnerId : ",
+        winnerId,
+        "losserId : ",
+        losserId
+      );
+      socket.emit("checkmate", { roomName, winnerId, losserId });
     }
     if (
       game.isStalemate() ||
       game.isThreefoldRepetition() ||
       game.isInsufficientMaterial()
     ) {
-      socket.emit("draw", roomName);
+      socket.emit("draw", { roomName });
     }
   }, [game]);
 
-  useEffect(() => {
-    console.log("checkmate : ", checkmate);
-    if (checkmate) {
-      socket.emit("checkmate", { roomName });
+  // on checkmate
+  socket.on(
+    "itsCheckmate",
+    ({
+      player1RatingBefore,
+      player1RatingAfter,
+      player2RatingBefore,
+      player2RatingAfter,
+    }) => {
+      console.log("player1RatingBefore : ", player1RatingBefore);
+      console.log("player1RatingAfter : ", player1RatingAfter);
+      console.log("player2RatingBefore : ", player2RatingBefore);
+      console.log("player2RatingAfter : ", player2RatingAfter);
+
+      setCheckmate(() => true);
+
+      console.log('disconnected');
+      socket.emit('userDisconnected', playerData.id);
+      socket.disconnect();
     }
-  }, [checkmate]);
+  );
 
-  socket.on("itsCheckmate", () => {
-    setCheckmate(() => true);
-  });
+  socket.on(
+    "itsDraw",
+    ({
+      player1RatingBefore,
+      player1RatingAfter,
+      player2RatingBefore,
+      player2RatingAfter,
+    }) => {
+      console.log("player1RatingBefore : ", player1RatingBefore);
+      console.log("player1RatingAfter : ", player1RatingAfter);
+      console.log("player2RatingBefore : ", player2RatingBefore);
+      console.log("player2RatingAfter : ", player2RatingAfter);
+      setDraw(() => true);
 
-  socket.on("itsDraw", () => {
-    setDraw(() => true);
-  });
+      socket.emit('userDisconnected', playerData.id);
+      socket.disconnect();
+    }
+  );
 
   return (
     <>
@@ -278,9 +296,9 @@ const PlayGame = () => {
                   className="w-12 h-12"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
@@ -309,9 +327,9 @@ const PlayGame = () => {
                   className="w-12 h-12"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
@@ -340,9 +358,9 @@ const PlayGame = () => {
                   className="w-12 h-12"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M12 9v6m3-3H9"
                   />
                 </svg>
@@ -357,6 +375,7 @@ const PlayGame = () => {
           </div>
         </div>
       )}
+
       {!checkmate && !draw && (
         <div className="h-screen w-screen flex flex-col items-center justify-center">
           {loading && <CenterSpinner />}
