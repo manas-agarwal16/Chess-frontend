@@ -123,18 +123,39 @@ const PlayGame = () => {
   });
 
   useEffect(() => {
-  if (roomName !== null && you.id !== undefined && opponent.id !== undefined) {
-    console.log('playersInfo: ',roomName, you.id, opponent.id, color, color === "white" ? "black" : "white", you.rating, opponent.rating);
-    socket.emit("playersInfo", {
-      roomName: roomName,
-      player1Id: you.id,
-      player2Id: opponent.id,
-      player1Color: color,
-      player2Color: color === "white" ? "black" : "white",
-      player1RatingBefore: you.rating,
-      player2RatingBefore: opponent.rating,
-    });
-  }
+    if (
+      roomName !== null &&
+      you.id !== undefined &&
+      opponent.id !== undefined
+    ) {
+      console.log(
+        "playersInfo: ",
+        roomName,
+        you.id,
+        opponent.id,
+        color,
+        color === "white" ? "black" : "white",
+        you.rating,
+        opponent.rating
+      );
+
+      //to prevent both players calling simultaneously , else unique roomName constraint will fail (simutaneously hone se condition true ha rhi thi kiuki us wakt roomName tha hi nai), so added random seconds to make calls at different times.
+      const seconds = Math.floor((Math.random() + Math.random()) * 5000); //two Math.random() to increase randomness
+
+      console.log("seconds : ", seconds);
+
+      setTimeout(() => {
+        socket.emit("playersInfo", {
+          roomName: roomName,
+          player1Id: you.id,
+          player2Id: opponent.id,
+          player1Color: color,
+          player2Color: color === "white" ? "black" : "white",
+          player1RatingBefore: you.rating,
+          player2RatingBefore: opponent.rating,
+        });
+      }, seconds);
+    }
   }, [roomName]);
 
   // const onDrop = (sourceSquare, targetSquare, piece) => {
