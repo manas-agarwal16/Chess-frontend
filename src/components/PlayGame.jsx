@@ -32,8 +32,8 @@ const PlayGame = () => {
   const [you, setYou] = useState({});
   const [opponent, setOpponent] = useState({});
   const [roomName, setRoomName] = useState(null);
-
-  const [isProcessOngoing, setIsProcessOngoing] = useState(true);
+  const [checkmate, setCheckmate] = useState(false);
+  const [draw, setDraw] = useState(false);
 
   // Add an event listener for the beforeunload event
   // window.addEventListener("beforeunload", (event) => {
@@ -106,25 +106,36 @@ const PlayGame = () => {
     console.log("player1 : ", players.player1);
     console.log("player2 : ", players.player2);
 
-    setRoomName(players.roomName);
-    setIsInGame(true);
-    setColor(
+    setRoomName(() => players.roomName);
+    setIsInGame(() => true);
+    setColor(() =>
       players.player1.id === playerData.id
         ? players.player1.color
         : players.player2.color
     );
-    setYou(
+    setYou(() =>
       players.player1.id === playerData.id ? players.player1 : players.player2
     );
-    setOpponent(
+    setOpponent(() =>
       players.player1.id === playerData.id ? players.player2 : players.player1
     );
-    setIsGameLoading(false);
-
-    //if getCurrentPlayer is player1 then playerColor = player1.color in socketSlice else playerColor = player2.color.
-
-    // navigate("/play");
+    setIsGameLoading(() => false);
   });
+
+  useEffect(() => {
+  if (roomName !== null && you.id !== undefined && opponent.id !== undefined) {
+    console.log('playersInfo: ',roomName, you.id, opponent.id, color, color === "white" ? "black" : "white", you.rating, opponent.rating);
+    socket.emit("playersInfo", {
+      roomName: roomName,
+      player1Id: you.id,
+      player2Id: opponent.id,
+      player1Color: color,
+      player2Color: color === "white" ? "black" : "white",
+      player1RatingBefore: you.rating,
+      player2RatingBefore: opponent.rating,
+    });
+  }
+  }, [roomName]);
 
   // const onDrop = (sourceSquare, targetSquare, piece) => {
   //   console.log("sourceSquare : ", sourceSquare);
@@ -156,9 +167,9 @@ const PlayGame = () => {
     console.log("targetSquare : ", targetSquare);
     console.log("piece : ", piece);
 
-    let pieceColor = piece[0] == 'w'  ? 'white' : 'black';
+    let pieceColor = piece[0] == "w" ? "white" : "black";
 
-    if(pieceColor !== color){
+    if (pieceColor !== color) {
       return false;
     }
 
@@ -180,7 +191,14 @@ const PlayGame = () => {
         return false;
       }
 
-      socket.emit("newChessPosition", { position: gameCopy.fen(), roomName });
+      socket.emit("newChessPosition", {
+        position: gameCopy.fen(),
+        roomName,
+        player1Id: you.id,
+        player2Id: opponent.id,
+        player1Color: color,
+        player2Color: color == "white" ? "black" : "white",
+      });
       return true;
     } catch (error) {
       console.log("invalid move : ", error);
@@ -189,30 +207,183 @@ const PlayGame = () => {
   };
   socket.on("makeMove", (newPosition) => {
     console.log("new position : ", newPosition);
-    setPosition(newPosition);
-    setGame(new Chess(newPosition));
+    setPosition(() => newPosition);
+    setGame(() => new Chess(newPosition));
+  });
+
+  useEffect(() => {
+    console.log("checkmate : ", game.isCheckmate());
+
+    if (game.isCheckmate()) {
+      socket.emit("checkmate", roomName);
+    }
+    if (
+      game.isStalemate() ||
+      game.isThreefoldRepetition() ||
+      game.isInsufficientMaterial()
+    ) {
+      socket.emit("draw", roomName);
+    }
+  }, [game]);
+
+  useEffect(() => {
+    console.log("checkmate : ", checkmate);
+    if (checkmate) {
+      socket.emit("checkmate", { roomName });
+    }
+  }, [checkmate]);
+
+  socket.on("itsCheckmate", () => {
+    setCheckmate(() => true);
+  });
+
+  socket.on("itsDraw", () => {
+    setDraw(() => true);
   });
 
   return (
-    <div className="h-screen w-screen flex flex-col items-center justify-center">
-      {loading && <CenterSpinner />}
-      {isGameLoading && <p>Waiting for a player to join</p>}
-      {!loading && !isGameLoading && (
-        <div className="w-full max-w-[550px] p-4 mx-auto">
-          <Chessboard
-            id="PlayVsRandom"
-            position={position}
-            onPieceDrop={onDrop}
-            boardOrientation={color}
-            customBoardStyle={{
-              borderRadius: "4px",
-              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-              width: "100%", // Ensure it takes full width of the parent container
-            }}
-          />
+    <>
+      {checkmate && game._turn === color[0] && (
+        <div className="h-screen flex items-center justify-center bg-gray-100">
+          <div className="text-center p-8 bg-white rounded-lg shadow-lg w-96">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Game Over</h2>
+            <div className="flex justify-center mb-6">
+              <div className="w-24 h-24 flex items-center justify-center bg-red-500 text-white rounded-full">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  className="w-12 h-12"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </div>
+            </div>
+            <p className="text-lg text-gray-700">You lost the game!</p>
+            <div className="mt-6">
+              <button className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition">
+                Try Again
+              </button>
+            </div>
+          </div>
         </div>
       )}
-    </div>
+      {checkmate && game._turn !== color[0] && (
+        <div className="h-screen flex items-center justify-center bg-gray-100">
+          <div className="text-center p-8 bg-white rounded-lg shadow-lg w-96">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Game Over</h2>
+            <div className="flex justify-center mb-6">
+              <div className="w-24 h-24 flex items-center justify-center bg-green-500 text-white rounded-full">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  className="w-12 h-12"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+            </div>
+            <p className="text-lg text-gray-700">You won the game!</p>
+            <div className="mt-6">
+              <button className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition">
+                Play Again
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {draw && (
+        <div className="h-screen flex items-center justify-center bg-gray-100">
+          <div className="text-center p-8 bg-white rounded-lg shadow-lg w-96">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Game Over</h2>
+            <div className="flex justify-center mb-6">
+              <div className="w-24 h-24 flex items-center justify-center bg-yellow-500 text-white rounded-full">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  className="w-12 h-12"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v6m3-3H9"
+                  />
+                </svg>
+              </div>
+            </div>
+            <p className="text-lg text-gray-700">The game is a draw!</p>
+            <div className="mt-6">
+              <button className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition">
+                Play Again
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {!checkmate && !draw && (
+        <div className="h-screen w-screen flex flex-col items-center justify-center">
+          {loading && <CenterSpinner />}
+          {isGameLoading && <p>Waiting for a player to join</p>}
+          {!loading && !isGameLoading && (
+            <div className="w-full max-w-[550px] p-4 mx-auto flex flex-col">
+              <p className="text-center ilatic text-lg text-white font-semibold">
+                {opponent.handle.toUpperCase()}
+              </p>
+              <Chessboard
+                id="PlayVsRandom"
+                position={position}
+                onPieceDrop={onDrop}
+                boardOrientation={color}
+                // customBoardStyle={{
+                //   borderRadius: "4px",
+                //   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
+                //   width: "100%", // Ensure it takes full width of the parent container
+                //   height: "100%",
+                //   position: "relative",
+                // }}
+                customBoardStyle={{
+                  borderRadius: "4px",
+                  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
+                  width: "100%",
+                  height: "100%",
+                  minWidth: "300px", // Minimum size for usability
+                  minHeight: "300px",
+                  maxWidth: "550px",
+                  maxHeight: "550px",
+                  position: "relative",
+                }}
+                //prevent page scrolling when dragging pieces
+                onPieceDragBegin={(piece, sourceSquare) => {
+                  document.body.style.overflow = "hidden";
+                }}
+                onPieceDragEnd={(piece, sourceSquare, targetSquare) => {
+                  document.body.style.overflow = ""; // Restore scrolling
+                }}
+              />
+              {/* <p className="text-center ilatic text-lg text-white font-semibold">
+                {you.handle.toUpperCase()}
+              </p> */}
+            </div>
+          )}
+        </div>
+      )}
+    </>
   );
 };
 

@@ -210,9 +210,13 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         console.log("action.payload", action.payload);
-        state.loading = false;
-        state.loginStatus = true;
-        state.playerData = action.payload.data.playerData;
+        if (action.payload === undefined) {
+          state.loading = false;
+        } else {
+          state.loading = false;
+          state.loginStatus = true;
+          state.playerData = action.payload.data.playerData;
+        }
       })
       .addCase(login.rejected, (state, action) => {
         console.log("login reject action.error", action.error);

@@ -1,4 +1,3 @@
-import ChessGame from "./ChessGame";
 import Home from "./Home";
 import Button from "./Button";
 import Input from "./Input";
@@ -9,4 +8,4 @@ import VerifyOTP from "./VerifyOTP";
 import Heading from "./Heading";
 import PlayGame from "./PlayGame.jsx";
 
-export {Home, ChessGame , Button , Input , Login , Register , CenterSpinner , VerifyOTP , Heading , PlayGame};
+export {Home , Button , Input , Login , Register , CenterSpinner , VerifyOTP , Heading , PlayGame};

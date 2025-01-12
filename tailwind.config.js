@@ -2,7 +2,7 @@
 module.exports = {
   content: [
     "./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}", // Make sure this matches the structure of your files
+    "./src/**/*.{js,jsx,ts,tsx}", // Ensure this matches your file structure
   ],
   theme: {
     extend: {
@@ -14,8 +14,9 @@ module.exports = {
       },
       animation: {
         slide: "slide 10s linear infinite",
+        spin: "spin 0.2s linear infinite", // Use Tailwind's default spin
+        "spin-custom": "spin 0.2s linear infinite", // Custom spin animation
       },
-
       colors: {
         "gradient-start": "rgba(255, 148, 88, 1)",
         "gradient-end": "rgba(252, 229, 172, 1)",
@@ -23,10 +24,6 @@ module.exports = {
       backgroundImage: {
         "custom-gradient":
           "linear-gradient(294.57deg, rgba(255, 148, 88, 1) 0%, rgba(252, 229, 172, 1) 100%)",
-      },
-      animation: {
-        spin: "spin 0.2s linear infinite", // Use Tailwind's default spin
-        "spin-custom": "spin 0.2s linear infinite", // Custom spin animation
       },
       keyframes: {
         spin: {
@@ -40,14 +37,14 @@ module.exports = {
     function ({ addUtilities }) {
       addUtilities({
         ".scrollbar-hidden": {
-          /* Hide scrollbar for Webkit browsers */
           "&::-webkit-scrollbar": { display: "none" },
-          /* Hide scrollbar for IE, Edge, and Firefox */
           "-ms-overflow-style": "none",
           "scrollbar-width": "none",
         },
+        ".debug-outline": {
+          outline: "1px solid red",
+        },
       });
     },
-    // require("@tailwindcss/line-clamp"),
   ],
 };
