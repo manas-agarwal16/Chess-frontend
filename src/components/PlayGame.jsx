@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 import { CenterSpinner } from "./index.js";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
-import { set } from "react-hook-form";
+import { updatePlayerRating } from "../store/features/gameSlice.js";
 
 const PlayGame = () => {
   const socket = useMemo(
@@ -31,6 +31,9 @@ const PlayGame = () => {
   const [color, setColor] = useState(null);
   const [you, setYou] = useState({});
   const [opponent, setOpponent] = useState({});
+  const [youNewRatinng, setYouNewRatinng] = useState(null);
+  const [opponentNewRating, setOpponentNewRating] = useState(null);
+  const [status, setStatus] = useState(null);
   const [roomName, setRoomName] = useState(null);
   const [checkmate, setCheckmate] = useState(false);
   const [draw, setDraw] = useState(false);
@@ -95,12 +98,12 @@ const PlayGame = () => {
     console.log("error : ", error);
   });
 
-  //clear
+  //waiting for a player
   socket.on("WaitingForAPlayer", (roomName) => {
     console.log("Waiting for a player to join: ", roomName);
   });
 
-  //clear
+  //start the game
   socket.on("startTheGame", async (players) => {
     console.log("roomName : ", players.roomName);
     console.log("player1 : ", players.player1);
@@ -202,12 +205,14 @@ const PlayGame = () => {
     }
   };
 
+  //backend makeMove
   socket.on("makeMove", (newPosition) => {
     console.log("new position : ", newPosition);
     setPosition(() => newPosition);
     setGame(() => new Chess(newPosition));
   });
 
+  //game over- checkmate or draw./
   useEffect(() => {
     console.log("checkmate : ", game.isCheckmate());
 
@@ -216,9 +221,11 @@ const PlayGame = () => {
       if (game._turn === color[0]) {
         winnerId = opponent.id;
         losserId = you.id;
+        setStatus(() => "Loss");
       } else {
         winnerId = you.id;
         losserId = opponent.id;
+        setStatus(() => "Won");
       }
       console.log(
         "roomName : ",
@@ -235,6 +242,7 @@ const PlayGame = () => {
       game.isThreefoldRepetition() ||
       game.isInsufficientMaterial()
     ) {
+      setStatus(() => "Draw");
       socket.emit("draw", { roomName });
     }
   }, [game]);
@@ -247,16 +255,30 @@ const PlayGame = () => {
       player1RatingAfter,
       player2RatingBefore,
       player2RatingAfter,
+      player1Id,
+      player2Id,
     }) => {
       console.log("player1RatingBefore : ", player1RatingBefore);
       console.log("player1RatingAfter : ", player1RatingAfter);
       console.log("player2RatingBefore : ", player2RatingBefore);
       console.log("player2RatingAfter : ", player2RatingAfter);
 
+      setYouNewRatinng(() =>
+        you.id === player1Id ? player1RatingAfter : player2RatingAfter
+      );
+      setOpponentNewRating(() =>
+        opponent.id === player1Id ? player1RatingAfter : player2RatingAfter
+      );
       setCheckmate(() => true);
 
-      console.log('disconnected');
-      socket.emit('userDisconnected', playerData.id);
+      dispatch(
+        updatePlayerRating(
+          you.id === player1Id ? player1RatingAfter : player2RatingAfter
+        )
+      );
+
+      console.log("disconnected");
+      socket.emit("userDisconnected", playerData.id);
       socket.disconnect();
     }
   );
@@ -268,21 +290,62 @@ const PlayGame = () => {
       player1RatingAfter,
       player2RatingBefore,
       player2RatingAfter,
+      player1Id,
+      player2Id,
     }) => {
       console.log("player1RatingBefore : ", player1RatingBefore);
       console.log("player1RatingAfter : ", player1RatingAfter);
       console.log("player2RatingBefore : ", player2RatingBefore);
       console.log("player2RatingAfter : ", player2RatingAfter);
+
+      setYouNewRatinng(() =>
+        you.id === player1Id ? player1RatingAfter : player2RatingAfter
+      );
+      setOpponentNewRating(() =>
+        opponent.id === player1Id ? player1RatingAfter : player2RatingAfter
+      );
+
+      dispatch(
+        updatePlayerRating(
+          you.id === player1Id ? player1RatingAfter : player2RatingAfter
+        )
+      );
+
       setDraw(() => true);
 
-      socket.emit('userDisconnected', playerData.id);
+      socket.emit("userDisconnected", playerData.id);
       socket.disconnect();
     }
   );
 
   return (
     <>
-      {checkmate && game._turn === color[0] && (
+      {(checkmate || draw) && (
+        <>
+          <div className="h-screen w-full border-2 border-black flex items-center justify-center bg-gray-100">
+            <div className="border-2 flex flex-col items-center justify-center">
+              <span>{you.handle}</span>
+              <span>Your Rating Before: {you.rating}</span>
+              <span>Your Rating Now: {youNewRatinng}</span>
+              <span>{status}</span>
+            </div>
+            <div className="border-2 border-red-500">Home</div>
+            <div className="border-2 flex flex-col items-center justify-center">
+              <span>{opponent.handle}</span>
+              <span>
+                {opponent.handle} Rating Before: {opponent.rating}
+              </span>
+              <span>
+                {opponent.handle} Rating Now: {opponentNewRating}
+              </span>
+              <span>
+                {status === "Draw" ? "Draw" : status === "Won" ? "Loss" : "Won"}
+              </span>
+            </div>
+          </div>
+        </>
+      )}
+      {/* {checkmate && game._turn === color[0] && (
         <div className="h-screen flex items-center justify-center bg-gray-100">
           <div className="text-center p-8 bg-white rounded-lg shadow-lg w-96">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Game Over</h2>
@@ -374,7 +437,7 @@ const PlayGame = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {!checkmate && !draw && (
         <div className="h-screen w-screen flex flex-col items-center justify-center">

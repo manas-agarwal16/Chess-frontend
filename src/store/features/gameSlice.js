@@ -13,6 +13,9 @@ const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {
+    updatePlayerRating: (state, action) => {
+      state.player.rating = action.payload;
+    },
     setGameLoading: (state, action) => {
       console.log("action.payload", action.payload);
       state.gameLoading = action.payload;
@@ -39,4 +42,5 @@ export const {
   setOpponent,
   setPlayer,
   setInGame,
+  updatePlayerRating,
 } = gameSlice.actions;
