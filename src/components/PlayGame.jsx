@@ -54,42 +54,47 @@ const PlayGame = () => {
   const [opponentResigned, setOpponentResigned] = useState(false);
   const [todoId, setTodoId] = useState(null); //konsa player task krega
 
-  // Add an event listener for the beforeunload event
-  // window.addEventListener("beforeunload", (event) => {
-  //   if (isProcessOngoing) {
-  //     // Show a confirmation dialog
-  //     event.preventDefault();
-  //     event.returnValue = ""; // Required for most modern browsers
-  //   }
+  // window.addEventListener("load", () => {
+  //   console.log("user reloaded");
   // });
 
-  //full screen
-  // const requestFullscreen = () => {
-  //   const doc = document.documentElement;
+  // full screen
+  const requestFullscreen = () => {
+    const doc = document.documentElement;
 
-  //   if (doc.requestFullscreen) {
-  //     doc.requestFullscreen();
-  //   } else if (doc.mozRequestFullScreen) {
-  //     // Firefox
-  //     doc.mozRequestFullScreen();
-  //   } else if (doc.webkitRequestFullscreen) {
-  //     // Chrome, Safari, and Opera
-  //     doc.webkitRequestFullscreen();
-  //   } else if (doc.msRequestFullscreen) {
-  //     // IE/Edge
-  //     doc.msRequestFullscreen();
-  //   }
-  // };
+    if (doc.requestFullscreen) {
+      doc.requestFullscreen();
+    } else if (doc.mozRequestFullScreen) {
+      // Firefox
+      doc.mozRequestFullScreen();
+    } else if (doc.webkitRequestFullscreen) {
+      // Chrome, Safari, and Opera
+      doc.webkitRequestFullscreen();
+    } else if (doc.msRequestFullscreen) {
+      // IE/Edge
+      doc.msRequestFullscreen();
+    }
+  };
 
   //login check and socket connection
   useEffect(() => {
+    console.log("resigned: ", sessionStorage.getItem("resigned"));
+
+    if (sessionStorage.getItem("resigned") == "true") {
+      console.log("navigate to the home");
+      navigate("/");
+      return;
+    }
     if (loginStatus === false && !loading) {
       navigate("/login");
     }
     if (loginStatus === true && loading === false) {
-      // requestFullscreen();
-
+      requestFullscreen();
       socket.connect();
+      // setTimeout(() => {
+      //   requestFullscreen();
+      //   socket.connect();
+      // }, 200);
 
       return () => {
         console.log("cleanup");
@@ -112,6 +117,27 @@ const PlayGame = () => {
         setEnterCode(() => true);
       }
     }
+  });
+
+  // Add an event listener for the beforeunload event
+  window.addEventListener("beforeunload", (event) => {
+    // if (isProcessOngoing) {
+    // event.preventDefault();
+    // event.returnValue = "";
+    if (you.id == todoId) {
+      console.log("updating todoId and leaving the game");
+      socket.emit("updateTodoId", { id: opponent.id, roomName });
+    }
+    sessionStorage.setItem("resigned", "true");
+    handleResignGame();
+    // console.log('re');
+
+    // console.log("user try to reload, resigning the game");
+  });
+
+  socket.on("updateTodoIdFromBackend", (id) => {
+    setTodoId(() => id);
+    console.log("todoId updated: ", id);
   });
 
   //ask to enter code
@@ -273,7 +299,9 @@ const PlayGame = () => {
   useEffect(() => {
     console.log("checkmate : ", game.isCheckmate());
     if (game.isCheckmate()) {
-      setGameLoading(() => true);
+      setTimeout(() => {
+        setGameLoading(() => true);
+      }, 1000);
       let winnerId, losserId;
       if (game._turn === color[0]) {
         winnerId = opponent.id;
@@ -296,7 +324,7 @@ const PlayGame = () => {
         setTimeout(() => {
           console.log("checkmate from up here");
           socket.emit("checkmate", { roomName, winnerId, losserId });
-        }, 1000);
+        }, 500);
       }
     }
     if (
@@ -308,7 +336,7 @@ const PlayGame = () => {
         setGameLoading(() => true);
         setStatus(() => "Draw");
         socket.emit("draw", { roomName });
-      }, 2000);
+      }, 500);
     }
   }, [game]);
 
@@ -408,15 +436,15 @@ const PlayGame = () => {
         setStatus(() => (you.id === playerId ? "Lost" : "Won"));
 
         if (you.id === todoId) {
-          console.log('checkmate from down here');
-          
+          console.log("checkmate from down here");
+
           socket.emit("checkmate", {
             roomName,
             winnerId: you.id === playerId ? opponent.id : you.id,
             losserId: playerId,
           });
         }
-      }, 2000);
+      }, 500);
     }
   });
 
@@ -549,7 +577,10 @@ const PlayGame = () => {
         <div className="h-screen w-screen flex flex-col items-center justify-center">
           {loading && <CenterSpinner />}
           {mode === "online" && !opponent.handle && (
-            <p>Waiting for a player to join</p>
+            <>
+              <p>Waiting for a player to join</p>
+              <p>Refreshing page might take you out of the game</p>
+            </>
           )}
           {resignGameMsg && (
             <>

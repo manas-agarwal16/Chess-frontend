@@ -16,6 +16,7 @@ const Home = () => {
   );
 
   useEffect(() => {
+    sessionStorage.setItem("resigned", "false");
     console.log("loginStatus:", loginStatus);
     console.log("playerData : ", playerData);
 
