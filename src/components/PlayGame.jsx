@@ -268,7 +268,6 @@ const PlayGame = () => {
   //game over- checkmate or draw to backend./
   useEffect(() => {
     console.log("checkmate : ", game.isCheckmate());
-
     if (game.isCheckmate()) {
       setTimeout(() => {
         setGameLoading(() => true);
