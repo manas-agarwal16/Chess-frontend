@@ -54,10 +54,6 @@ const PlayGame = () => {
   const [opponentResigned, setOpponentResigned] = useState(false);
   const [todoId, setTodoId] = useState(null); //konsa player task krega
 
-  // window.addEventListener("load", () => {
-  //   console.log("user reloaded");
-  // });
-
   // full screen
   const requestFullscreen = () => {
     const doc = document.documentElement;
@@ -214,23 +210,7 @@ const PlayGame = () => {
       you.id !== undefined &&
       opponent.id !== undefined
     ) {
-      // console.log(
-      //   "playersInfo: ",
-      //   roomName,
-      //   you.id,
-      //   opponent.id,
-      //   color,
-      //   color === "white" ? "black" : "white",
-      //   you.rating,
-      //   opponent.rating
-      // );
-
-      //to prevent both players calling simultaneously , else unique roomName constraint will fail (simutaneously hone se condition true ha rhi thi kiuki us wakt roomName tha hi nai), so added random seconds to make calls at different times.
-      const seconds = Math.floor((Math.random() + Math.random()) * 5000); //two Math.random() to increase randomness
-
-      console.log("seconds : ", seconds);
-
-      setTimeout(() => {
+      if (you.id === todoId) {
         socket.emit("playersInfo", {
           roomName: roomName,
           player1Id: you.id,
@@ -240,15 +220,11 @@ const PlayGame = () => {
           player1RatingBefore: you.rating,
           player2RatingBefore: opponent.rating,
         });
-      }, seconds);
+      }
     }
   }, [roomName]);
 
   const onDrop = (sourceSquare, targetSquare, piece) => {
-    // console.log("sourceSquare : ", sourceSquare);
-    // console.log("targetSquare : ", targetSquare);
-    // console.log("piece : ", piece);
-
     let pieceColor = piece[0] == "w" ? "white" : "black";
 
     if (pieceColor !== color) {
@@ -256,7 +232,6 @@ const PlayGame = () => {
     }
 
     const gameCopy = new Chess(game.fen());
-    // console.log("game : ", gameCopy.fen());
 
     try {
       const move = gameCopy.move({
@@ -265,11 +240,7 @@ const PlayGame = () => {
         promotion: piece[1].toLowerCase() ?? "q", // always promote to a queen for example simplicity
       });
 
-      // console.log("move : ", move);
-
       if (move === null) {
-        // console.log("invalid move");
-        // setGame(game);
         return false;
       }
 
@@ -290,7 +261,6 @@ const PlayGame = () => {
 
   //backend makeMove
   socket.on("makeMove", (newPosition) => {
-    // console.log("new position : ", newPosition);
     setPosition(() => newPosition);
     setGame(() => new Chess(newPosition));
   });
@@ -321,10 +291,8 @@ const PlayGame = () => {
         losserId
       );
       if (you.id === todoId) {
-        setTimeout(() => {
-          console.log("checkmate from up here");
-          socket.emit("checkmate", { roomName, winnerId, losserId });
-        }, 500);
+        console.log("checkmate from up here");
+        socket.emit("checkmate", { roomName, winnerId, losserId });
       }
     }
     if (
@@ -351,11 +319,6 @@ const PlayGame = () => {
       player1Id,
       player2Id,
     }) => {
-      // console.log("player1RatingBefore : ", player1RatingBefore);
-      // console.log("player1RatingAfter : ", player1RatingAfter);
-      // console.log("player2RatingBefore : ", player2RatingBefore);
-      // console.log("player2RatingAfter : ", player2RatingAfter);
-
       setYouNewRatinng(() =>
         you.id === player1Id ? player1RatingAfter : player2RatingAfter
       );
@@ -388,11 +351,6 @@ const PlayGame = () => {
       player1Id,
       player2Id,
     }) => {
-      console.log("player1RatingBefore : ", player1RatingBefore);
-      console.log("player1RatingAfter : ", player1RatingAfter);
-      console.log("player2RatingBefore : ", player2RatingBefore);
-      console.log("player2RatingAfter : ", player2RatingAfter);
-
       setYouNewRatinng(() =>
         you.id === player1Id ? player1RatingAfter : player2RatingAfter
       );
@@ -436,7 +394,7 @@ const PlayGame = () => {
         setStatus(() => (you.id === playerId ? "Lost" : "Won"));
 
         if (you.id === todoId) {
-          console.log("checkmate from down here");
+          // console.log("checkmate from down here");
 
           socket.emit("checkmate", {
             roomName,
@@ -444,10 +402,43 @@ const PlayGame = () => {
             losserId: playerId,
           });
         }
-      }, 500);
+      }, 2000);
     }
   });
 
+  //custom chess pieces
+  const pieces = [
+    "wP",
+    "wN",
+    "wB",
+    "wR",
+    "wQ",
+    "wK",
+    "bP",
+    "bN",
+    "bB",
+    "bR",
+    "bQ",
+    "bK",
+  ];
+  const customPieces = useMemo(() => {
+    const pieceComponents = {};
+    pieces.forEach((piece) => {
+      pieceComponents[piece] = ({ squareWidth = 10 }) => (
+        <div
+          style={{
+            width: squareWidth,
+            height: squareWidth,
+            backgroundImage: `url(/assets/${piece}.svg)`,
+            backgroundSize: "100%",
+          }}
+        />
+      );
+    });
+    console.log("pieceComponents : ", pieceComponents);
+    
+    return pieceComponents;
+  }, []);
   return (
     <>
       {gameLoading && !opponentResigned && <CenterSpinner />}
@@ -629,9 +620,9 @@ const PlayGame = () => {
             </>
           )}
           {!loading && !gameLoading && opponent.handle && (
-            <div className="w-full max-w-[550px] p-4 mx-auto flex flex-col">
+            <div className="w-[600px] p-4 mx-auto flex flex-col">
               <p className="text-center ilatic text-lg text-white font-semibold">
-                {opponent.handle.toUpperCase()}
+                {opponent.handle.toUpperCase()} : RATING {opponent.rating}
               </p>
               <Chessboard
                 id="PlayVsRandom"
@@ -641,21 +632,33 @@ const PlayGame = () => {
                 // customBoardStyle={{
                 //   borderRadius: "4px",
                 //   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-                //   width: "100%", // Ensure it takes full width of the parent container
+                //   width: "100%",
                 //   height: "100%",
+                //   minWidth: "300px", // Minimum size for usability
+                //   minHeight: "300px",
+                //   maxWidth: "550px",
+                //   maxHeight: "550px",
                 //   position: "relative",
                 // }}
                 customBoardStyle={{
-                  borderRadius: "4px",
-                  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
+                  borderRadius: "8px", // Slightly rounded corners for a modern look
+                  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.7)", // Enhanced shadow for depth
                   width: "100%",
                   height: "100%",
-                  minWidth: "300px", // Minimum size for usability
+                  minWidth: "300px",
                   minHeight: "300px",
-                  maxWidth: "550px",
-                  maxHeight: "550px",
-                  position: "relative",
+                  maxWidth: "600px",
+                  maxHeight: "600px",
+                  overflow: "hidden", // Hide pieces that go beyond the board
+                  backgroundColor: "#f0d9b5", // Light tan background
                 }}
+                customDarkSquareStyle={{
+                  backgroundColor: "#31363F",
+                }}
+                customLightSquareStyle={{
+                  backgroundColor: "#d9d7b6",
+                }}
+                customPieces={customPieces}
                 //prevent page scrolling when dragging pieces
                 onPieceDragBegin={(piece, sourceSquare) => {
                   document.body.style.overflow = "hidden";
@@ -664,13 +667,13 @@ const PlayGame = () => {
                   document.body.style.overflow = ""; // Restore scrolling
                 }}
               />
-              <Button
+              {/* <Button
                 text={"Resign the Game"}
                 onClick={() => setResignGameMsg(true)}
                 className={
                   "bg-red-500 text-white w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm"
                 }
-              />
+              /> */}
             </div>
           )}
         </div>
