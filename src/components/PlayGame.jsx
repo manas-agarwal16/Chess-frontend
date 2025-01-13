@@ -52,6 +52,7 @@ const PlayGame = () => {
   const [code, setCode] = useState(null);
   const [resignGameMsg, setResignGameMsg] = useState(false);
   const [opponentResigned, setOpponentResigned] = useState(false);
+  const [todoId, setTodoId] = useState(null); //konsa player task krega
 
   // Add an event listener for the beforeunload event
   // window.addEventListener("beforeunload", (event) => {
@@ -160,6 +161,9 @@ const PlayGame = () => {
     // console.log("player1 : ", players.player1);
     // console.log("player2 : ", players.player2);
 
+    console.log("todoId: ", players.todoId);
+
+    setTodoId(players.todoId);
     setAskToEnterCode(() => false);
     setEnterCode(() => false);
     setRoomName(() => players.roomName);
@@ -269,30 +273,31 @@ const PlayGame = () => {
   useEffect(() => {
     console.log("checkmate : ", game.isCheckmate());
     if (game.isCheckmate()) {
-      setTimeout(() => {
-        setGameLoading(() => true);
-        let winnerId, losserId;
-        if (game._turn === color[0]) {
-          winnerId = opponent.id;
-          losserId = you.id;
-          setStatus(() => "Lost");
-        } else {
-          winnerId = you.id;
-          losserId = opponent.id;
-          setStatus(() => "Won");
-        }
-        console.log(
-          "roomName : ",
-          roomName,
-          "winnerId : ",
-          winnerId,
-          "losserId : ",
-          losserId
-        );
-        console.log("checkmate from up here");
-
-        socket.emit("checkmate", { roomName, winnerId, losserId });
-      }, 1000);
+      setGameLoading(() => true);
+      let winnerId, losserId;
+      if (game._turn === color[0]) {
+        winnerId = opponent.id;
+        losserId = you.id;
+        setStatus(() => "Lost");
+      } else {
+        winnerId = you.id;
+        losserId = opponent.id;
+        setStatus(() => "Won");
+      }
+      console.log(
+        "roomName : ",
+        roomName,
+        "winnerId : ",
+        winnerId,
+        "losserId : ",
+        losserId
+      );
+      if (you.id === todoId) {
+        setTimeout(() => {
+          console.log("checkmate from up here");
+          socket.emit("checkmate", { roomName, winnerId, losserId });
+        }, 1000);
+      }
     }
     if (
       game.isStalemate() ||
@@ -402,7 +407,9 @@ const PlayGame = () => {
         setOpponentResigned(() => false);
         setStatus(() => (you.id === playerId ? "Lost" : "Won"));
 
-        if (you.id !== playerId) {
+        if (you.id === todoId) {
+          console.log('checkmate from down here');
+          
           socket.emit("checkmate", {
             roomName,
             winnerId: you.id === playerId ? opponent.id : you.id,
