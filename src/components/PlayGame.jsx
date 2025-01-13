@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 import { useForm } from "react-hook-form";
 import { CenterSpinner, Input, Button } from "./index.js";
@@ -20,7 +20,7 @@ const PlayGame = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { mode } = useParams();
-  console.log("mode: ", mode);
+  // console.log("mode: ", mode);
 
   const [game, setGame] = useState(new Chess());
   const [position, setPosition] = useState(game.fen());
@@ -50,6 +50,8 @@ const PlayGame = () => {
   const [askToEnterCode, setAskToEnterCode] = useState(false);
   const [enterCode, setEnterCode] = useState(false);
   const [code, setCode] = useState(null);
+  const [resignGameMsg, setResignGameMsg] = useState(false);
+  const [opponentResigned, setOpponentResigned] = useState(false);
 
   // Add an event listener for the beforeunload event
   // window.addEventListener("beforeunload", (event) => {
@@ -142,6 +144,9 @@ const PlayGame = () => {
   //for any error from backend
   socket.on("error", (error) => {
     console.log("error : ", error);
+    setGameLoading(() => false);
+    setOpponentResigned(() => false);
+    setResignGameMsg(() => false);
   });
 
   //waiting for a player
@@ -152,8 +157,8 @@ const PlayGame = () => {
   //start the game
   socket.on("startTheGame", async (players) => {
     console.log("roomName : ", players.roomName);
-    console.log("player1 : ", players.player1);
-    console.log("player2 : ", players.player2);
+    // console.log("player1 : ", players.player1);
+    // console.log("player2 : ", players.player2);
 
     setAskToEnterCode(() => false);
     setEnterCode(() => false);
@@ -179,16 +184,16 @@ const PlayGame = () => {
       you.id !== undefined &&
       opponent.id !== undefined
     ) {
-      console.log(
-        "playersInfo: ",
-        roomName,
-        you.id,
-        opponent.id,
-        color,
-        color === "white" ? "black" : "white",
-        you.rating,
-        opponent.rating
-      );
+      // console.log(
+      //   "playersInfo: ",
+      //   roomName,
+      //   you.id,
+      //   opponent.id,
+      //   color,
+      //   color === "white" ? "black" : "white",
+      //   you.rating,
+      //   opponent.rating
+      // );
 
       //to prevent both players calling simultaneously , else unique roomName constraint will fail (simutaneously hone se condition true ha rhi thi kiuki us wakt roomName tha hi nai), so added random seconds to make calls at different times.
       const seconds = Math.floor((Math.random() + Math.random()) * 5000); //two Math.random() to increase randomness
@@ -210,9 +215,9 @@ const PlayGame = () => {
   }, [roomName]);
 
   const onDrop = (sourceSquare, targetSquare, piece) => {
-    console.log("sourceSquare : ", sourceSquare);
-    console.log("targetSquare : ", targetSquare);
-    console.log("piece : ", piece);
+    // console.log("sourceSquare : ", sourceSquare);
+    // console.log("targetSquare : ", targetSquare);
+    // console.log("piece : ", piece);
 
     let pieceColor = piece[0] == "w" ? "white" : "black";
 
@@ -221,7 +226,7 @@ const PlayGame = () => {
     }
 
     const gameCopy = new Chess(game.fen());
-    console.log("game : ", gameCopy.fen());
+    // console.log("game : ", gameCopy.fen());
 
     try {
       const move = gameCopy.move({
@@ -230,10 +235,10 @@ const PlayGame = () => {
         promotion: piece[1].toLowerCase() ?? "q", // always promote to a queen for example simplicity
       });
 
-      console.log("move : ", move);
+      // console.log("move : ", move);
 
       if (move === null) {
-        console.log("invalid move");
+        // console.log("invalid move");
         // setGame(game);
         return false;
       }
@@ -255,7 +260,7 @@ const PlayGame = () => {
 
   //backend makeMove
   socket.on("makeMove", (newPosition) => {
-    console.log("new position : ", newPosition);
+    // console.log("new position : ", newPosition);
     setPosition(() => newPosition);
     setGame(() => new Chess(newPosition));
   });
@@ -265,35 +270,41 @@ const PlayGame = () => {
     console.log("checkmate : ", game.isCheckmate());
 
     if (game.isCheckmate()) {
-      setGameLoading(() => true);
-      let winnerId, losserId;
-      if (game._turn === color[0]) {
-        winnerId = opponent.id;
-        losserId = you.id;
-        setStatus(() => "Lost");
-      } else {
-        winnerId = you.id;
-        losserId = opponent.id;
-        setStatus(() => "Won");
-      }
-      console.log(
-        "roomName : ",
-        roomName,
-        "winnerId : ",
-        winnerId,
-        "losserId : ",
-        losserId
-      );
-      socket.emit("checkmate", { roomName, winnerId, losserId });
+      setTimeout(() => {
+        setGameLoading(() => true);
+        let winnerId, losserId;
+        if (game._turn === color[0]) {
+          winnerId = opponent.id;
+          losserId = you.id;
+          setStatus(() => "Lost");
+        } else {
+          winnerId = you.id;
+          losserId = opponent.id;
+          setStatus(() => "Won");
+        }
+        console.log(
+          "roomName : ",
+          roomName,
+          "winnerId : ",
+          winnerId,
+          "losserId : ",
+          losserId
+        );
+        console.log("checkmate from up here");
+
+        socket.emit("checkmate", { roomName, winnerId, losserId });
+      }, 1000);
     }
     if (
       game.isStalemate() ||
       game.isThreefoldRepetition() ||
       game.isInsufficientMaterial()
     ) {
-      setGameLoading(() => true);
-      setStatus(() => "Draw");
-      socket.emit("draw", { roomName });
+      setTimeout(() => {
+        setGameLoading(() => true);
+        setStatus(() => "Draw");
+        socket.emit("draw", { roomName });
+      }, 2000);
     }
   }, [game]);
 
@@ -308,10 +319,10 @@ const PlayGame = () => {
       player1Id,
       player2Id,
     }) => {
-      console.log("player1RatingBefore : ", player1RatingBefore);
-      console.log("player1RatingAfter : ", player1RatingAfter);
-      console.log("player2RatingBefore : ", player2RatingBefore);
-      console.log("player2RatingAfter : ", player2RatingAfter);
+      // console.log("player1RatingBefore : ", player1RatingBefore);
+      // console.log("player1RatingAfter : ", player1RatingAfter);
+      // console.log("player2RatingBefore : ", player2RatingBefore);
+      // console.log("player2RatingAfter : ", player2RatingAfter);
 
       setYouNewRatinng(() =>
         you.id === player1Id ? player1RatingAfter : player2RatingAfter
@@ -371,9 +382,41 @@ const PlayGame = () => {
     }
   );
 
+  const handleResignGame = () => {
+    setResignGameMsg(() => false);
+    socket.emit("resignGame", { roomName, playerId: playerData.id });
+  };
+
+  socket.on("resignedGame", ({ roomName, playerId }) => {
+    console.log("resignedGame : ", roomName, playerId);
+
+    if (you.id != (undefined || null) && opponent.id != (undefined || null)) {
+      console.log("you.id : ", you.id);
+      if (you.id === playerId) {
+        console.log("you resigned the game");
+      } else {
+        console.log("here");
+        setOpponentResigned(() => true);
+      }
+      setGameLoading(() => true);
+      setTimeout(() => {
+        setOpponentResigned(() => false);
+        setStatus(() => (you.id === playerId ? "Lost" : "Won"));
+
+        if (you.id !== playerId) {
+          socket.emit("checkmate", {
+            roomName,
+            winnerId: you.id === playerId ? opponent.id : you.id,
+            losserId: playerId,
+          });
+        }
+      }, 2000);
+    }
+  });
+
   return (
     <>
-      {gameLoading && <CenterSpinner />}
+      {gameLoading && !opponentResigned && <CenterSpinner />}
       {(checkmate || draw) && (
         <>
           <div className="h-screen bg- w-full border-4 border-gray-700 flex items-center justify-center">
@@ -437,11 +480,18 @@ const PlayGame = () => {
 
           {/* Square with Buttons (Friend Box) */}
           <div className="fixed inset-0 flex items-center justify-center z-20">
-            <div className="relative w-72 h-72 bg-[#DEB887] rounded-lg shadow-lg flex flex-col items-center justify-center">
+            <div className="relative w-72 h-72 bg-[#DEB887] rounded-lg shadow-lg flex flex-col items-center justify-center gap-4">
               {/* Close Button */}
               {/* Modal Content */}
-              <p>Ask Your Friend To Enter The Code: </p>
-              <p>{code}</p>
+              <p className="text-gray-900">
+                Ask Your Friend To Enter The Code:{" "}
+              </p>
+              <p className="text-gray-700 bg-white w-32 rounded text-center">
+                {code}
+              </p>
+              <Link to={"/"} className="text-gray-700 text-sm underline">
+                Home
+              </Link>
             </div>
           </div>
         </>
@@ -475,12 +525,15 @@ const PlayGame = () => {
                       {errors.code.message}
                     </p>
                   )}
-                  <Button
-                    type="submit"
-                    text={"Join"}
-                    className="w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm"
-                  />
                 </div>
+                <Button
+                  type="submit"
+                  text={"Join"}
+                  className="w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm"
+                />
+                <Link to={"/"} className="text-gray-700 text-sm underline">
+                  Home
+                </Link>
               </form>
             </div>
           </div>
@@ -489,7 +542,55 @@ const PlayGame = () => {
       {!checkmate && !draw && (
         <div className="h-screen w-screen flex flex-col items-center justify-center">
           {loading && <CenterSpinner />}
-          {gameLoading && <p>Waiting for a player to join</p>}
+          {mode === "online" && !opponent.handle && (
+            <p>Waiting for a player to join</p>
+          )}
+          {resignGameMsg && (
+            <>
+              {/* Blur Background (whole screen) */}
+              <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm z-10"></div>
+
+              {/* Square with Buttons (Friend Box) */}
+              <div className="fixed inset-0 flex items-center justify-center z-20">
+                <div className="relative w-72 h-72 bg-[#DEB887] rounded-lg shadow-lg flex flex-col items-center justify-center">
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setResignGameMsg(false)}
+                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                  >
+                    &times;
+                  </button>
+                  {/* Modal Content */}
+                  <p className="text-gray-900 text-lg font-semibold text-center">
+                    Warning! Resigning the game will affect your rating and
+                    count as a loss.
+                  </p>
+                  <button
+                    onClick={() => {
+                      handleResignGame();
+                    }}
+                    className="mb-4 w-32 px-4 py-2  text-white bg-red-500 rounded hover:bg-red-600"
+                  >
+                    Resign the Game
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+          {opponentResigned === true && (
+            <>
+              {/* Blur Background (whole screen) */}
+              <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm z-10"></div>
+
+              {/* Square with Buttons (Friend Box) */}
+              <div className="fixed inset-0 flex items-center justify-center z-20">
+                <div className="relative w-72 h-72 bg-[#DEB887] rounded-lg shadow-lg flex flex-col items-center justify-center">
+                  {/* Close Button */}
+                  <p>{opponent.handle} has resigned the game. You Won!!! 🎉</p>
+                </div>
+              </div>
+            </>
+          )}
           {!loading && !gameLoading && opponent.handle && (
             <div className="w-full max-w-[550px] p-4 mx-auto flex flex-col">
               <p className="text-center ilatic text-lg text-white font-semibold">
@@ -526,9 +627,13 @@ const PlayGame = () => {
                   document.body.style.overflow = ""; // Restore scrolling
                 }}
               />
-              {/* <p className="text-center ilatic text-lg text-white font-semibold">
-                {you.handle.toUpperCase()}
-              </p> */}
+              <Button
+                text={"Resign the Game"}
+                onClick={() => setResignGameMsg(true)}
+                className={
+                  "bg-red-500 text-white w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm"
+                }
+              />
             </div>
           )}
         </div>

@@ -11,25 +11,17 @@ const App = () => {
   useEffect(() => {
     (async () => {
       const res = await dispatch(getCurrentPlayer());
-      console.log("res.payload here : ", res);
+      // console.log("res.payload here : ", res);
       if (!res.payload) {
         const refreshRes = await dispatch(refreshAccessToken());
         // console.log("res.payload of refreshAccessToken : ", refreshRes);
 
         if (refreshRes.payload) {
-          dispatch(getCurrentUser());
+          dispatch(getCurrentPlayer());
         }
       }
     })();
   }, [dispatch]);
-
-  const [id, setId] = useState(6);
-
-  const handlePlayWithStranger = () => {
-    console.log("Play with stranger : ", socket);
-
-    
-  };
 
   return (
     <div className="bg-[#DEB887]">
