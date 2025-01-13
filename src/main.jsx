@@ -29,7 +29,7 @@ const router = createBrowserRouter([
         element: <VerifyOTP />,
       },
       {
-        path: "play-game",
+        path: "play-game/:mode",
         element: <PlayGame />,
       },
     ],
