@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { login, resendOTP, verifyOTP } from "../store/features/authSlice";
 import { useForm } from "react-hook-form";
-import { Button, Input, CenterSpinner , Heading } from "./index";
+import { Button, Input, CenterSpinner, Heading } from "./index";
 import chessImage from "../assets/chess-image.jpg";
 
 const VerifyOTP = () => {
@@ -18,7 +18,7 @@ const VerifyOTP = () => {
 
   const handleResendOTP = () => {
     console.log("here");
-    
+
     dispatch(resendOTP({ email }));
   };
 
@@ -33,7 +33,7 @@ const VerifyOTP = () => {
           emailOrHandle: res.payload.data.email,
           password: res.payload.data.password,
         })
-      );  
+      );
       navigate("/");
     } else {
       reset();
@@ -43,7 +43,7 @@ const VerifyOTP = () => {
 
   return (
     <div className="flex min-h-screen w-screen">
-      <section className="min-h-screen w-full flex-col items-center justify-center">
+      <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-screen min-h-[50vh] w-full p-0 items-center justify-center hidden">
         <img
           className="w-full h-full shadow-lg"
           src={chessImage}
@@ -64,9 +64,10 @@ const VerifyOTP = () => {
               <div className="mb-3">
                 <label
                   htmlFor="otp"
-                  className="block text-sm font-semibold text-white mb-2"
+                  className="block text-sm font-semibold text-gray-300 mb-2"
                 >
-                  Enter the OTP sent to the email <span className="text-gray-700">{email}</span>
+                  Enter the OTP sent to the email: {" "}
+                  <span className="text-gray-100 underline tracking-wide">{email}</span>
                 </label>
                 <Input
                   {...register("OTP", { required: true })}
@@ -74,14 +75,14 @@ const VerifyOTP = () => {
                   id="otp"
                   placeholder="Enter OTP"
                   maxLength="6"
-                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2"
+                  className="w-full p-2 rounded-md focus:outline-none focus:ring-2"
                 />
               </div>
 
               <div className="mb-5">
                 <p className="text-white">
                   <button
-                    className="text-gray-700 underline hover:text-gray-800"
+                    className="text-gray-300 underline hover:text-gray-800"
                     onClick={handleResendOTP}
                   >
                     Resend OTP

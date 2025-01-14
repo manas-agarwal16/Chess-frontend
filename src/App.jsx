@@ -24,7 +24,7 @@ const App = () => {
   }, [dispatch]);
 
   return (
-    <div className="bg-gray-800 h-screen">
+    <div className="bg-gray-800 min-h-screen selection:bg-[#a45633]">
       <Outlet />
     </div>
   );

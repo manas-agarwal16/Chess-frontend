@@ -3,11 +3,12 @@ import React, { useId, forwardRef } from "react";
 function Input(
   {
     label,
-    textColor = "text-gray-600",
+    textColor = "text-gray-200",
     labelColor = "text-gray-300",
     type = "text",
-    bgColor = "bg-[#FFF8DC]",
+    bgColor = "bg-slate-700",
     className = "",
+    placeHolder = "placeholder:text-gray-200",
     labelClass = "",
     ...props
   },
@@ -29,7 +30,7 @@ function Input(
           ref={ref}
           id={id}
           type={type}
-          className={`w-full rounded-lg  p-2 text-sm ${className} ${textColor} ${bgColor}`}
+          className={`w-full rounded-lg p-2 text-sm ${className} ${textColor} ${bgColor} ${placeHolder}`}
           {...props}
         />
       </div>

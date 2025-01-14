@@ -17,8 +17,8 @@ const Home = () => {
 
   useEffect(() => {
     sessionStorage.setItem("resigned", "false");
-    console.log("loginStatus:", loginStatus);
-    console.log("playerData : ", playerData);
+    // console.log("loginStatus:", loginStatus);
+    // console.log("playerData : ", playerData);
 
     if (loginStatus === false && !loading) {
       navigate("/login");
@@ -50,11 +50,11 @@ const Home = () => {
 
           {/* Square with Buttons (Friend Box) */}
           <div className="fixed inset-0 flex items-center justify-center z-20">
-            <div className="relative w-72 h-72 bg-[#DEB887] rounded-lg shadow-lg flex flex-col items-center justify-center">
+            <div className="relative w-72 h-72 bg-gray-800 rounded-lg shadow-lg flex flex-col items-center justify-center">
               {/* Close Button */}
               <button
                 onClick={() => setFriendBox(false)}
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-400"
               >
                 &times;
               </button>
@@ -64,7 +64,7 @@ const Home = () => {
                   navigate(`/play-game/friend-create`);
                   setFriendBox(false);
                 }}
-                className="mb-4 w-32 px-4 py-2  text-gray-600 bg-[#F5DEB3] rounded hover:bg-[#FFDEAD]"
+                className="mb-4 w-32 px-4 py-2  text-gray-100 bg-[#BC8F8F] rounded hover:bg-[#bd8c8c]"
               >
                 Create Room
               </button>
@@ -73,7 +73,7 @@ const Home = () => {
                   navigate(`/play-game/friend-join`);
                   setFriendBox(false);
                 }}
-                className="px-4 w-32 py-2 text-gray-600 bg-[#F5DEB3] rounded hover:bg-[#FFDEAD]"
+                className="px-4 w-32 py-2 text-slate-700 bg-[#a9b096] rounded hover:bg-[#aab392]"
               >
                 Join a Room
               </button>
@@ -81,45 +81,74 @@ const Home = () => {
           </div>
         </>
       )}
-      <div className="flex min-h-screen w-screen">
-        <section className="min-h-screen w-full p-0 flex-col items-center justify-center">
+      <div className="flex flex-col lg:flex-row min-h-screen w-screen">
+        {/* Left Section */}
+        <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-screen min-h-[50vh] w-full p-0 items-center justify-center hidden">
           <img
-            className="w-full h-full shadow-2xl"
+            className="w-full h-[50vh] lg:h-full object-cover shadow-2xl"
             src={chessImage2}
             alt="chess-image"
           />
         </section>
-        <section className="w-full min-h-screen flex flex-col py-4 px-2 items-center justify-between">
-          <div className="flex w-full justify-between items-center">
-            <div></div>
+
+        {/* Right Section */}
+        <section className="w-full min-h-screen flex flex-col py-2 items-center justify-between">
+          {/* Header */}
+          <div className="flex w-full justify-between items-center pl-2 pr-4">
+            <div className="text-gray-200 flex">
+              <span className="text-[#F4A460] inline">Rating:</span>{" "}
+              <span className="ml-1">{playerData?.rating}</span>
+            </div>
             <input
-              className="rounded relative left-8 border-gray-600 border-2 bg-[#FFF8DC] px-2 outline-none py-1 text-lg w-96 font-sans"
+              className="rounded-lg text-[#1E5162] border-blue-300 border-2 bg-gray-400 placeholder:text-slate-200 px-2 outline-none py-2 text-md w-80 md:w-80 font-sans"
               type="text"
-              placeholder="search handle"
+              placeholder="search handle..."
             />
-            <img
-              className="rounded-full w-12 h-12 cursor-pointer border-2"
-              src="https://cdn.pixabay.com/photo/2016/03/31/19/56/avatar-1295397_1280.png"
-              alt="profile-image"
-            />
+            <div className="pl-4 flex flex-col items-center cursor-pointer">
+              <img
+                className="rounded-full w-10 h-10 sm:w-12 sm:h-12 border-2 border-gray-500 hover:border-gray-600"
+                src="https://cdn.pixabay.com/photo/2016/03/31/19/56/avatar-1295397_1280.png"
+                alt="profile-image"
+              />
+              <span className="text-[#F4A460] text-sm">
+                {playerData?.handle}
+              </span>
+            </div>
           </div>
-          <Heading />
-          <div className="flex flex-col items-center justify-center gap-10">
+
+          {/* Main Content */}
+          <div className="text-center relative bottom-10 lg:bottom-5 flex text-gray-300  flex-col items-center gap-8">
+            <div>
+              <Heading />
+              <p className="text-center px-4 pt-6">
+                <span className="text-blue-500 inline">"</span>A chess learning
+                platform that lets you communicate live with your opponent
+                during games and grow together.
+                <span className="text-blue-500 inline">"</span>
+              </p>
+            </div>
+            <p>
+              Invite your trainer for a friendly match and prepare as a team😉
+            </p>
+          </div>
+          <div className="flex flex-col items-center justify-center gap-16 sm:gap-10 lg:gap-6">
             <Button
               onClick={handlePlayWithStranger}
-              className="text-xl border-2 border-[#F4A460]"
+              className="text-xl border-2 border-[#F4A460] max-w-72 md:max-w-96"
               text={"Play Online"}
             />
             <Button
               onClick={handlePlayWithFriend}
-              className="text-xl border-2 border-[#BC8F8F]"
+              className="text-xl border-2 border-[#BC8F8F] max-w-72 md:max-w-96 mx-4"
               text={"Play with friend"}
             />
           </div>
-          <div>
+
+          {/* Footer */}
+          <div className="w-full flex justify-end pb-4 px-4">
             <Button
               onClick={handleLogout}
-              className="text-xl border-2 w-48 bg-[#BC8F8F] not-italic border-[#BC8F8F]"
+              className="text-xl border-2 w-auto md:w-auto bg-[#A0522D] text-slate-200 not-italic border-[#BC8F8F]"
               text={"Logout"}
             />
           </div>

@@ -29,7 +29,7 @@ const Login = () => {
 
   return (
     <div className="flex min-h-screen w-screen">
-      <section className="min-h-screen w-full flex-col items-center justify-center">
+      <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-screen min-h-[50vh] w-full p-0 items-center justify-center hidden">
         <img
           className="w-full h-full shadow-lg"
           src={chessImage}
@@ -40,7 +40,7 @@ const Login = () => {
         <Heading />
         {loading && <CenterSpinner width={40} />}
         <div className="flex justify-center items-center h-full mx-auto w-full px-4 pt-2 text-white">
-          <div className="p-4 pb-3 border-[2px] rounded-lg shadow-md text-white max-w-2xl w-full">
+          <div className="p-4 pb-3 border-[2px] border-slate-500 rounded-lg shadow-md text-white max-w-2xl w-full">
             <div className="flex items-center justify-center">
               <h2 className="text-2xl font-bold mb-3 text-center font-sans">
                 Login
@@ -59,7 +59,7 @@ const Login = () => {
                   type="text"
                   autoFocus
                   placeholder="email or handle"
-                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2"
+                  className="w-full p-2 rounded-md focus:outline-none focus:ring"
                 />
                 {errors.emailOrHandle && (
                   <p className="text-red-500 text-sm mt-1">
@@ -81,7 +81,7 @@ const Login = () => {
                   id="password"
                   type="password"
                   placeholder="password"
-                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2"
+                  className="w-full p-2 rounded-md focus:outline-none focus:ring-2"
                 />
                 {errors.password && (
                   <p className="text-red-500 text-sm mt-1">
@@ -91,11 +91,11 @@ const Login = () => {
               </div>
 
               <div className="mb-5">
-                <p className="text-white">
+                <p className="text-gray-200">
                   Don't have an account?{" "}
                   <Link
                     to={"/register"}
-                    className="text-gray-700 underline hover:text-gray-800 transition duration-200"
+                    className="text-gray-300 underline hover:text-gray-400 transition duration-200"
                   >
                     Create One
                   </Link>{" "}

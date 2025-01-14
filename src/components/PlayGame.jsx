@@ -436,9 +436,16 @@ const PlayGame = () => {
       );
     });
     console.log("pieceComponents : ", pieceComponents);
-    
+
     return pieceComponents;
   }, []);
+
+  const handleCleanUp = () => {
+    socket.emit("userDisconnected", playerData.id);
+    socket.disconnect();
+    navigate('/');
+  };
+
   return (
     <>
       {gameLoading && !opponentResigned && <CenterSpinner />}
@@ -505,16 +512,19 @@ const PlayGame = () => {
 
           {/* Square with Buttons (Friend Box) */}
           <div className="fixed inset-0 flex items-center justify-center z-20">
-            <div className="relative w-72 h-72 bg-[#DEB887] rounded-lg shadow-lg flex flex-col items-center justify-center gap-4">
+            <div className="relative w-72 h-72 bg-[#BC8F8F] rounded-lg shadow-lg flex flex-col items-center justify-center gap-4">
               {/* Close Button */}
               {/* Modal Content */}
-              <p className="text-gray-900">
+              <p className="text-slate-700 font-semibold text-center">
                 Ask Your Friend To Enter The Code:{" "}
               </p>
-              <p className="text-gray-700 bg-white w-32 rounded text-center">
+              <p className="text-gray-700 bg-gray-300 w-32 rounded text-center">
                 {code}
               </p>
-              <Link to={"/"} className="text-gray-700 text-sm underline">
+              <Link
+                onClick={handleCleanUp}
+                className="text-gray-700 text-sm underline"
+              >
                 Home
               </Link>
             </div>
