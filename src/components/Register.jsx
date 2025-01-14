@@ -44,7 +44,7 @@ const Register = () => {
 
   return (
     <div className="flex min-h-screen w-screen">
-      <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-screen min-h-[50vh] w-full p-0 items-center justify-center hidden">
+      <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-4/5 min-h-[50vh] w-full p-0 items-center justify-center hidden">
         <img
           className="w-full h-full shadow-lg"
           src={chessImage}
@@ -53,7 +53,7 @@ const Register = () => {
       </section>
       <section className="w-full min-h-screen flex flex-col px-6 items-center justify-between">
         <Heading />
-        {loading && <CenterSpinner width={40} />}
+        {loading && <CenterSpinner width={10} />}
         <div className="flex justify-center items-center h-full mx-auto w-full px-4 pt-2 text-white">
           <div className="p-4 pb-3 border-[2px] border-slate-500 rounded-lg shadow-md text-white max-w-2xl w-full">
             <div className="flex items-center justify-center">

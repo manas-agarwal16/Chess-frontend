@@ -3,7 +3,14 @@ import "./index.css";
 import App from "./App.jsx";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
-import { Home, Login, Register, VerifyOTP , PlayGame } from "./pages/index.js";
+import {
+  Home,
+  Login,
+  Register,
+  VerifyOTP,
+  PlayGame,
+  PlayerProfile,
+} from "./pages/index.js";
 import store from "./store/store.js";
 import { Toaster } from "react-hot-toast";
 
@@ -31,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: "play-game/:mode",
         element: <PlayGame />,
+      },
+      {
+        path: "profile/:handle",
+        element: <PlayerProfile />,
       },
     ],
   },

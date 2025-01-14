@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../utils/axiosInstance.js";
+import axios from "axios";
 import toast from "react-hot-toast";
 import { data } from "react-router-dom";
 
@@ -26,6 +27,8 @@ export const register = createAsyncThunk(
     console.log("userData.avatar[0] : ", userData.avatar[0]);
 
     if (userData.avatar[0]) {
+      console.log("in here sir");
+
       const avatarAndPresetName = new FormData();
       avatarAndPresetName.append("file", userData.avatar[0]);
       avatarAndPresetName.append(
@@ -33,21 +36,34 @@ export const register = createAsyncThunk(
         import.meta.env.VITE_CLOUDINARY_PRESET_NAME
       );
 
-      data = await axios.post(
-        `https://api.cloudinary.com/v1_1/${
-          import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-        }/image/upload`,
-        avatarAndPresetName
+      try {
+        data = await axios.post(
+          `https://api.cloudinary.com/v1_1/${
+            import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+          }/image/upload`,
+          avatarAndPresetName
+        );
+      } catch (error) {
+        console.log("error deploying avatar to cloudinary: ", error);
+      }
+      console.log(
+        "data after deploying avatar to cloudinary: ",
+        data?.data?.secure_url
       );
     }
 
-    data.handle = userData.handle;
-    data.email = userData.email;
-    data.password = userData.password;
-    data.avatar = data.secure_url;
+    const userDataForBackend = {
+      handle: userData.handle,
+      email: userData.email,
+      password: userData.password,
+      avatarURL: data?.data?.secure_url,
+    };
 
     try {
-      const res = await axiosInstance.post("/players/register", data);
+      const res = await axiosInstance.post(
+        "/players/register",
+        userDataForBackend
+      );
       console.log("Register backend response:", res.data);
       toast.success(res.data.message);
       return true;
@@ -116,6 +132,20 @@ export const logout = createAsyncThunk(
   }
 );
 
+export const fetchPlayerRating = createAsyncThunk(
+  "fetchPlayerData",
+  async (id, { rejectWithValue }) => {
+    try {
+      console.log("fetch player rating");
+      const res = await axiosInstance.get(`/players/fetch-player-rating/${id}`);
+      console.log("res.data", res.data);
+      return res.data;
+    } catch (error) {
+      console.log("error in fetchPlayerRating", error);
+    }
+  }
+);
+
 export const refreshAccessToken = createAsyncThunk(
   "refreshAccessToken",
   async (data, { rejectWithValue }) => {
@@ -141,6 +171,19 @@ const authSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    builder.addCase(fetchPlayerRating.pending, (state, action) => {
+      // state.loading = true;
+    })
+    builder.addCase(fetchPlayerRating.fulfilled, (state, action) => {
+      console.log("fetchPlayerRating action.payload", action.payload);
+      // state.loading = false;
+      state.playerData.rating = action.payload.data;
+    });
+    builder.addCase(fetchPlayerRating.rejected, (state, action) => {
+      console.log("fetchPlayerRating action.error", action.error);
+      // state.loading = false;
+    });
+
     builder
       .addCase(getCurrentPlayer.pending, (state, action) => {
         state.loading = true;

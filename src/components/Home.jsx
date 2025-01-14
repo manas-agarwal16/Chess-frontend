@@ -3,7 +3,8 @@ import chessImage2 from "../assets/chess-image2.jpg";
 import { Button, CenterSpinner, Heading } from "./index.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../store/features/authSlice.js";
+import { logout, fetchPlayerRating } from "../store/features/authSlice.js";
+import { axiosInstance } from "../utils/axiosInstance.js";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ const Home = () => {
 
     if (loginStatus === false && !loading) {
       navigate("/login");
+    } else if (loginStatus === true && !loading) {
+      dispatch(fetchPlayerRating(playerData?.id));
     }
   }, [loginStatus, loading, navigate]);
 
@@ -38,6 +41,10 @@ const Home = () => {
   const handlePlayWithFriend = () => {
     console.log("play with friend clicked");
     setFriendBox(true);
+  };
+
+  const playerProfile = async () => {
+    navigate(`/profile/${playerData?.handle}`);
   };
 
   return (
@@ -83,9 +90,9 @@ const Home = () => {
       )}
       <div className="flex flex-col lg:flex-row min-h-screen w-screen">
         {/* Left Section */}
-        <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-screen min-h-[50vh] w-full p-0 items-center justify-center hidden">
+        <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-3/4 min-h-[50vh] p-0 items-center justify-center hidden">
           <img
-            className="w-full h-[50vh] lg:h-full object-cover shadow-2xl"
+            className="w-full h-[50vh] lg:h-full object-cover shadow-2xl object-center"
             src={chessImage2}
             alt="chess-image"
           />
@@ -106,8 +113,12 @@ const Home = () => {
             />
             <div className="pl-4 flex flex-col items-center cursor-pointer">
               <img
+                onClick={playerProfile}
                 className="rounded-full w-10 h-10 sm:w-12 sm:h-12 border-2 border-gray-500 hover:border-gray-600"
-                src="https://cdn.pixabay.com/photo/2016/03/31/19/56/avatar-1295397_1280.png"
+                src={
+                  playerData?.avatar ??
+                  "https://cdn.pixabay.com/photo/2016/03/31/19/56/avatar-1295397_1280.png"
+                }
                 alt="profile-image"
               />
               <span className="text-[#F4A460] text-sm">
@@ -123,7 +134,7 @@ const Home = () => {
               <p className="text-center px-4 pt-6">
                 <span className="text-blue-500 inline">"</span>A chess learning
                 platform that lets you communicate live with your opponent
-                during games and grow together.
+                during games and grow together
                 <span className="text-blue-500 inline">"</span>
               </p>
             </div>
@@ -147,6 +158,7 @@ const Home = () => {
           {/* Footer */}
           <div className="w-full flex justify-end pb-4 px-4">
             <Button
+              bgColor={"bg-[#A0522D]"}
               onClick={handleLogout}
               className="text-xl border-2 w-auto md:w-auto bg-[#A0522D] text-slate-200 not-italic border-[#BC8F8F]"
               text={"Logout"}

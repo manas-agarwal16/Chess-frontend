@@ -86,24 +86,26 @@ const PlayGame = () => {
     }
     if (loginStatus === true && loading === false) {
       requestFullscreen();
+      console.log("user connected");
       socket.connect();
-      // setTimeout(() => {
-      //   requestFullscreen();
-      //   socket.connect();
-      // }, 200);
-
       return () => {
         console.log("cleanup");
         socket.emit("userDisconnected", playerData.id);
-        socket.disconnect();
+        // socket.disconnect();
       };
     }
   }, [loginStatus, loading, navigate]);
+
+  socket.on("userDisconnectedSuccessfully", (msg) => {
+    console.log(msg);
+    socket.disconnect();
+  });
 
   //play with stranger , createRoom , joinRoom
   socket.on("connect", () => {
     console.log("socket connected");
     if (mode === "online") {
+      setGameLoading(() => true);
       socket.emit("playWithStranger", playerData.id);
     } else {
       if (mode === "friend-create") {
@@ -120,11 +122,15 @@ const PlayGame = () => {
     // if (isProcessOngoing) {
     // event.preventDefault();
     // event.returnValue = "";
-    if (you.id == todoId) {
+    sessionStorage.setItem("resigned", "true");
+    if (!todoId) {
+      socket.emit("userDisconnected", playerData.id);
+      // socket.disconnect();
+      return;
+    } else if (you.id == todoId) {
       console.log("updating todoId and leaving the game");
       socket.emit("updateTodoId", { id: opponent.id, roomName });
     }
-    sessionStorage.setItem("resigned", "true");
     handleResignGame();
     // console.log('re');
 
@@ -174,6 +180,7 @@ const PlayGame = () => {
 
   //waiting for a player
   socket.on("WaitingForAPlayer", (roomName) => {
+    setGameLoading(() => false);
     console.log("Waiting for a player to join: ", roomName);
   });
 
@@ -336,7 +343,7 @@ const PlayGame = () => {
       console.log("disconnected");
       socket.emit("userDisconnected", playerData.id);
       setGameLoading(() => false);
-      socket.disconnect();
+      // socket.disconnect();
     }
   );
 
@@ -442,8 +449,8 @@ const PlayGame = () => {
 
   const handleCleanUp = () => {
     socket.emit("userDisconnected", playerData.id);
-    socket.disconnect();
-    navigate('/');
+    // socket.disconnect();
+    navigate("/");
   };
 
   return (
@@ -453,10 +460,14 @@ const PlayGame = () => {
         <>
           <div className="h-screen bg- w-full border-4 border-gray-700 flex items-center justify-center">
             {/* Player Info Section */}
-            <div className="flex flex-col items-center justify-center space-y-6 p-6 bg-gray-300 shadow-lg rounded-lg w-1/3">
-              <div className="flex flex-col items-center space-y-2">
+            <div
+              className={`flex flex-col items-center justify-center space-y-6 p-6 bg-gray-300 shadow-lg rounded-lg w-1/3 ${
+                status === "Won" ? "bg-white" : "bg-gray-300"
+              }`}
+            >
+              <div className={`flex flex-col items-center space-y-2 `}>
                 <span className="text-xl font-bold text-gray-800">
-                  {you.handle}
+                  {you.handle.toUpperCase()}
                 </span>
                 <span className="text-lg text-gray-600">
                   Rating Before: {you.rating}
@@ -481,10 +492,14 @@ const PlayGame = () => {
             <div className="mx-8 bg-gray-400 h-80 w-0.5"></div>
 
             {/* Opponent Info Section */}
-            <div className="flex flex-col items-center justify-center space-y-6 p-6 bg-white shadow-lg rounded-lg w-1/3">
-              <div className="flex flex-col items-center space-y-2">
+            <div
+              className={`flex flex-col bg-gray-300 items-center justify-center space-y-6 p-6 shadow-lg rounded-lg w-1/3 ${
+                status === "Lost" ? "bg-white" : "bg-gray-300"
+              }`}
+            >
+              <div className={`flex flex-col items-center space-y-2 `}>
                 <span className="text-xl font-bold text-gray-800">
-                  {opponent.handle}
+                  {opponent.handle.toUpperCase()}
                 </span>
                 <span className="text-lg text-gray-600">
                   Rating Before: {opponent.rating}
@@ -515,7 +530,7 @@ const PlayGame = () => {
             <div className="relative w-72 h-72 bg-[#BC8F8F] rounded-lg shadow-lg flex flex-col items-center justify-center gap-4">
               {/* Close Button */}
               {/* Modal Content */}
-              <p className="text-slate-700 font-semibold text-center">
+              <p className="text-slate-600 font-semibold text-center">
                 Ask Your Friend To Enter The Code:{" "}
               </p>
               <p className="text-gray-700 bg-gray-300 w-32 rounded text-center">
@@ -538,7 +553,7 @@ const PlayGame = () => {
 
           {/* Square with Buttons (Friend Box) */}
           <div className="fixed inset-0 flex items-center justify-center z-20">
-            <div className="relative w-72 h-72 bg-[#DEB887] rounded-lg shadow-lg flex flex-col items-center justify-center">
+            <div className="relative w-72 h-72 bg-[#a9b096] rounded-lg shadow-lg flex flex-col items-center justify-center">
               {/* Enter code form */}
               <form onSubmit={handleSubmit(handleEnteredCode)}>
                 <div className="mb-3">
@@ -552,8 +567,8 @@ const PlayGame = () => {
                     {...register("code", { required: true })}
                     type="text"
                     autoFocus
-                    placeholder="email or handle"
-                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2"
+                    placeholder="Enter your code"
+                    className="w-full p-2 border rounded-md bg-slate-100 focus:outline-none focus:ring-2 text-slate-800 placeholder:text-slate-400"
                   />
                   {errors.code && (
                     <p className="text-red-500 text-sm mt-1">
@@ -564,9 +579,10 @@ const PlayGame = () => {
                 <Button
                   type="submit"
                   text={"Join"}
-                  className="w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm"
+                  bgColor="bg-[#a9b096] text-gray-"
+                  className="w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm bg-[#e9f8c178] text-slate-600"
                 />
-                <Link to={"/"} className="text-gray-700 text-sm underline">
+                <Link to={"/"} className="text-gray-700 block text-center pt-3 text-sm underline">
                   Home
                 </Link>
               </form>
@@ -579,8 +595,17 @@ const PlayGame = () => {
           {loading && <CenterSpinner />}
           {mode === "online" && !opponent.handle && (
             <>
-              <p>Waiting for a player to join</p>
-              <p>Refreshing page might take you out of the game</p>
+              <p className="text-gray-500 text-2xl py-4">
+                Waiting for a player to join...
+              </p>
+              <p className="text-gray-400 text-sm text-center mx-4">
+                {" "}
+                <span className="text-slate-400 inline-block font-semibold text-md">
+                  Note:{" "}
+                </span>{" "}
+                Refreshing the page during the game will be treated as a
+                resignation. Please ensure a stable connection.
+              </p>
             </>
           )}
           {resignGameMsg && (

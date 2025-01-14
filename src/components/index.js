@@ -7,5 +7,6 @@ import CenterSpinner from "./CenterSpinner";
 import VerifyOTP from "./VerifyOTP";
 import Heading from "./Heading";
 import PlayGame from "./PlayGame.jsx";
+import PlayerProfile from "./PlayerProfile.jsx";
 
-export {Home , Button , Input , Login , Register , CenterSpinner , VerifyOTP , Heading , PlayGame};
+export {Home , Button , Input , Login , Register , CenterSpinner , VerifyOTP , Heading , PlayGame , PlayerProfile};
