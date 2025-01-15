@@ -74,6 +74,8 @@ const PlayGame = () => {
 
   //login check and socket connection
   useEffect(() => {
+    console.log("todoId changes: ", todoId);
+
     console.log("resigned: ", sessionStorage.getItem("resigned"));
 
     if (sessionStorage.getItem("resigned") == "true") {
@@ -90,11 +92,49 @@ const PlayGame = () => {
       socket.connect();
       return () => {
         console.log("cleanup");
-        socket.emit("userDisconnected", playerData.id);
+        sessionStorage.setItem("resigned", "true");
+        // console.log("beforeunload");
+        // console.log("todoId: ", todoId);
+
+        // if (!todoId) {
+        //   console.log('todoId is null, resigning the game');
+
+        //   socket.emit("userDisconnected", playerData.id)
+        //   return;
+        // } else if (you.id == todoId) {
+        //   console.log("updating todoId and leaving the game");
+        //   socket.emit("updateTodoId", { id: opponent.id, roomName });
+        // }
+        // handleResignGame();
+        // socket.emit("userDisconnected", playerData.id);
         // socket.disconnect();
       };
     }
   }, [loginStatus, loading, navigate]);
+
+  // Add an event listener for the beforeunload event
+  window.addEventListener("beforeunload", (event) => {
+    // if (isProcessOngoing) {
+    event.preventDefault();
+    event.returnValue = "";
+    // sessionStorage.setItem("resigned", "true");
+    console.log("beforeunload");
+
+    if (!todoId) {
+      console.log("todoId is null in window, resigning the game");
+
+      socket.emit("userDisconnected", playerData.id);
+      // socket.disconnect();
+      return;
+    } else if (you.id == todoId) {
+      console.log("updating todoId and leaving the game");
+      socket.emit("updateTodoId", { id: opponent.id, roomName });
+    }
+    handleResignGame();
+    // console.log('re');
+
+    // console.log("user try to reload, resigning the game");
+  });
 
   socket.on("userDisconnectedSuccessfully", (msg) => {
     console.log(msg);
@@ -115,26 +155,6 @@ const PlayGame = () => {
         setEnterCode(() => true);
       }
     }
-  });
-
-  // Add an event listener for the beforeunload event
-  window.addEventListener("beforeunload", (event) => {
-    // if (isProcessOngoing) {
-    // event.preventDefault();
-    // event.returnValue = "";
-    sessionStorage.setItem("resigned", "true");
-    if (!todoId) {
-      socket.emit("userDisconnected", playerData.id);
-      // socket.disconnect();
-      return;
-    } else if (you.id == todoId) {
-      console.log("updating todoId and leaving the game");
-      socket.emit("updateTodoId", { id: opponent.id, roomName });
-    }
-    handleResignGame();
-    // console.log('re');
-
-    // console.log("user try to reload, resigning the game");
   });
 
   socket.on("updateTodoIdFromBackend", (id) => {
@@ -380,6 +400,8 @@ const PlayGame = () => {
   );
 
   const handleResignGame = () => {
+    console.log("resigning the game");
+
     setResignGameMsg(() => false);
     socket.emit("resignGame", { roomName, playerId: playerData.id });
   };
@@ -582,7 +604,10 @@ const PlayGame = () => {
                   bgColor="bg-[#a9b096] text-gray-"
                   className="w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm bg-[#e9f8c178] text-slate-600"
                 />
-                <Link to={"/"} className="text-gray-700 block text-center pt-3 text-sm underline">
+                <Link
+                  to={"/"}
+                  className="text-gray-700 block text-center pt-3 text-sm underline"
+                >
                   Home
                 </Link>
               </form>
@@ -682,8 +707,8 @@ const PlayGame = () => {
                   height: "100%",
                   minWidth: "300px",
                   minHeight: "300px",
-                  maxWidth: "600px",
-                  maxHeight: "600px",
+                  maxWidth: "550px",
+                  maxHeight: "550px",
                   overflow: "hidden", // Hide pieces that go beyond the board
                   backgroundColor: "#f0d9b5", // Light tan background
                 }}
@@ -702,13 +727,13 @@ const PlayGame = () => {
                   document.body.style.overflow = ""; // Restore scrolling
                 }}
               />
-              {/* <Button
+              <Button
                 text={"Resign the Game"}
                 onClick={() => setResignGameMsg(true)}
                 className={
                   "bg-red-500 text-white w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm"
                 }
-              /> */}
+              />
             </div>
           )}
         </div>

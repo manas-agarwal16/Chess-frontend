@@ -131,15 +131,16 @@ const Home = () => {
           <div className="text-center relative bottom-10 lg:bottom-5 flex text-gray-300  flex-col items-center gap-8">
             <div>
               <Heading />
-              <p className="text-center px-4 pt-6">
-                <span className="text-blue-500 inline">"</span>A chess learning
+              <p className="text-center px-4 pt-6 font-semibold text-lg">
+                <span className="text-[#A0522D] inline">"</span>A chess learning
                 platform that lets you communicate live with your opponent
                 during games and grow together
-                <span className="text-blue-500 inline">"</span>
+                <span className="text-[#A0522D] inline">"</span>
               </p>
             </div>
-            <p>
-              Invite your trainer for a friendly match and prepare as a team😉
+            <p className="from-gradient-start inline-block to-gradient-end bg-clip-text text-transparent bg-gradient-to-r text-lg">
+              Invite your trainer for a friendly match and prepare as a team{" "}
+              <span className="inline text-white">😉</span>
             </p>
           </div>
           <div className="flex flex-col items-center justify-center gap-16 sm:gap-10 lg:gap-6">
