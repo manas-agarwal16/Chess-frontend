@@ -136,9 +136,9 @@ export const fetchPlayerRating = createAsyncThunk(
   "fetchPlayerData",
   async (id, { rejectWithValue }) => {
     try {
-      console.log("fetch player rating");
+      // console.log("fetch player rating");
       const res = await axiosInstance.get(`/players/fetch-player-rating/${id}`);
-      console.log("res.data", res.data);
+      // console.log("res.data", res.data);
       return res.data;
     } catch (error) {
       console.log("error in fetchPlayerRating", error);
@@ -175,7 +175,7 @@ const authSlice = createSlice({
       // state.loading = true;
     })
     builder.addCase(fetchPlayerRating.fulfilled, (state, action) => {
-      console.log("fetchPlayerRating action.payload", action.payload);
+      // console.log("fetchPlayerRating action.payload", action.payload);
       // state.loading = false;
       state.playerData.rating = action.payload.data;
     });
@@ -189,10 +189,10 @@ const authSlice = createSlice({
         state.loading = true;
       })
       .addCase(getCurrentPlayer.fulfilled, (state, action) => {
-        console.log(
-          "getCurrentPlayer action.payload.data",
-          action.payload?.data
-        );
+        // console.log(
+        //   "getCurrentPlayer action.payload.data",
+        //   action.payload?.data
+        // );
 
         state.loading = false;
         if (action.payload?.data?.playerData) {

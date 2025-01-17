@@ -1,12 +1,13 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { CenterSpinner, Input, Button } from "./index.js";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import { updatePlayerRating } from "../store/features/gameSlice.js";
+import { use } from "react";
 
 const PlayGame = () => {
   const socket = useMemo(
@@ -54,6 +55,12 @@ const PlayGame = () => {
   const [opponentResigned, setOpponentResigned] = useState(false);
   const [todoId, setTodoId] = useState(null); //konsa player task krega
 
+  const roomNameRef = useRef(null);
+  const checkmateRef = useRef(null);
+  const drawRef = useRef(null);
+  const todoIdRef = useRef(null);
+  const opponentRef = useRef({});
+
   // full screen
   const requestFullscreen = () => {
     const doc = document.documentElement;
@@ -72,15 +79,10 @@ const PlayGame = () => {
     }
   };
 
-  // console.log("todoId changes: ", todoId);
-  // console.log("opponent changes : ", opponent);
-
   //login check and socket connection
   useEffect(() => {
-    console.log("resigned: ", sessionStorage.getItem("resigned"));
-
     if (sessionStorage.getItem("resigned") == "true") {
-      console.log("navigate to the home");
+      // console.log("navigate to the home");
       navigate("/");
       return;
     }
@@ -91,251 +93,64 @@ const PlayGame = () => {
       // requestFullscreen();
       console.log("user connected");
       socket.connect();
+      //when user goes back <-
       return () => {
-        console.log("cleanup");
-        socket.emit("userDisconnected", { playerId: playerData.id, roomName });
+        console.log("cleanup from login useEffect");
+        console.log("roomName: ", roomNameRef.current);
+        console.log("todoId: ", todoIdRef.current);
+        console.log("opponentId: ", opponentRef.current.Id);
+
+        sessionStorage.setItem("resigned", "true");
+        if (!roomNameRef.current) {
+          socket.disconnect();
+          return;
+        }
+
+        if (!(checkmateRef.current || drawRef.current)) {
+          if (playerData.id === todoIdRef.current) {
+            socket.emit("updateTodoId", {
+              id: opponentRef.current.id,
+              roomName: roomNameRef.current,
+            });
+          }
+          // sessionStorage.setItem("resigned", "true");
+          console.log(
+            "resigned roomName , playerId : ",
+            roomNameRef.current,
+            playerData.id
+          );
+          handleResignGame();
+        }
       };
     }
   }, [loginStatus, loading, navigate]);
 
   //running fine
-  useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      console.log("beforeunload");
-      console.log("todoId: ", todoId);
-      console.log("opponent: ", opponent);
-
-      if (you.id == todoId) {
-        console.log("updating todoId and leaving the game");
-        socket.emit("updateTodoId", { id: opponent.id, roomName });
-      }
-      sessionStorage.setItem("resigned", "true");
-      handleResignGame();
-
-      // To trigger the browser's built-in confirmation dialog
-      event.preventDefault();
-      event.returnValue = ""; // Chrome requires returnValue to be set
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    // Cleanup on component unmount
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [todoId, opponent, you, roomName]);
-
-  // Add an event listener for the beforeunload event
-  window.addEventListener("beforeunload", (event) => {
-    // if (isProcessOngoing) {
-    event.preventDefault();
-    event.returnValue = "";
-    // sessionStorage.setItem("resigned", "true");
-    console.log("beforeunload");
-    console.log("todoId: ", todoId);
-    console.log("opponenet : ", opponent);
-
-    // if (!todoId) {
-    //   console.log("todoId is null in window, resigning the game");
-
-    //   socket.emit("userDisconnected", { playerId: playerData.id, roomName });
-    //   // socket.disconnect();
-    //   return;
-    // } else
-    if (you.id == todoId) {
-      console.log("updating todoId and leaving the game");
-      socket.emit("updateTodoId", { id: opponent.id, roomName });
-    }
-    sessionStorage.setItem("resigned", "true");
-    handleResignGame();
-    // console.log('re');
-
-    // console.log("user try to reload, resigning the game");
-  });
-
-  socket.on("userDisconnectedSuccessfully", (playerId) => {
-    console.log(msg);
-    if (playerId === opponent.id) {
-      setOpponentResigned(() => true);
-    } else if (
-      !game.isCheckmate() &&
-      !(
-        game.isStalemate() ||
-        game.isThreefoldRepetition() ||
-        game.isInsufficientMaterial()
-      )
-    ) {
-      handleResignGame();
-      // socket.disconnect();
-    }
-    else{
-      socket.disconnect();
-    }
-  });
-
   // useEffect(() => {
-  //   if (
-  //     opponentResigned === true &&
-  //     !game.isCheckmate() &&
-  //     !(
-  //       game.isStalemate() ||
-  //       game.isThreefoldRepetition() ||
-  //       game.isInsufficientMaterial()
-  //     )
-  //   ) {
-  //   }
-  // }, [opponentResigned]);
+  //   const handleBeforeUnload = (event) => {
+  //     console.log("beforeunload");
+  //     console.log("todoId: ", todoId);
+  //     console.log("opponent: ", opponent);
 
-  //play with stranger , createRoom , joinRoom
-  socket.on("connect", () => {
-    console.log("socket connected");
-    if (mode === "online") {
-      setGameLoading(() => true);
-      socket.emit("playWithStranger", playerData.id);
-    } else {
-      if (mode === "friend-create") {
-        setGameLoading(() => true);
-        socket.emit("createRoom", playerData.id);
-      } else {
-        setEnterCode(() => true);
-      }
-    }
-  });
+  //     if (you.id == todoId) {
+  //       console.log("updating todoId and leaving the game");
+  //       socket.emit("updateTodoId", { id: opponent.id, roomName });
+  //     }
+  //     sessionStorage.setItem("resigned", "true");
+  //     handleResignGame();
 
-  socket.on("updateTodoIdFromBackend", (id) => {
-    setTodoId(() => id);
-    console.log("todoId updated: ", id);
-  });
+  //     // To trigger the browser's built-in confirmation dialog
+  //     event.preventDefault();
+  //     event.returnValue = ""; // Chrome requires returnValue to be set
+  //   };
 
-  //ask to enter code
-  socket.on("askToEnterCode", (uniqueCode) => {
-    setAskToEnterCode(true);
-    setGameLoading(() => false);
-    setCode(uniqueCode);
-  });
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
 
-  //join room
-  const handleEnteredCode = ({ code }) => {
-    console.log("entered code : ", code);
-    setGameLoading(() => true);
-    socket.emit("joinRoom", { code, playerId: playerData.id });
-  };
-
-  //invalid friend code
-  socket.on("invalidCode", () => {
-    console.log("invalid code");
-    setGameLoading(() => false);
-    setError("code", {
-      type: "manual",
-      message: "Invalid Code",
-    });
-  });
-
-  socket.on("disconnect", () => {
-    socket.emit("userDisconnected", { playerId: playerData.id, roomName });
-  });
-
-  //for any error from backend
-  socket.on("error", (error) => {
-    console.log("error : ", error);
-    setGameLoading(() => false);
-    setOpponentResigned(() => false);
-    setResignGameMsg(() => false);
-  });
-
-  //waiting for a player
-  socket.on("WaitingForAPlayer", (roomName) => {
-    setGameLoading(() => false);
-    console.log("Waiting for a player to join: ", roomName);
-  });
-
-  //start the game
-  socket.on("startTheGame", async (players) => {
-    console.log("roomName : ", players.roomName);
-    // console.log("player1 : ", players.player1);
-    // console.log("player2 : ", players.player2);
-
-    console.log("todoId: ", players.todoId);
-
-    setTodoId(players.todoId);
-    setAskToEnterCode(() => false);
-    setEnterCode(() => false);
-    setRoomName(() => players.roomName);
-    setColor(() =>
-      players.player1.id === playerData.id
-        ? players.player1.color
-        : players.player2.color
-    );
-    setYou(() =>
-      players.player1.id === playerData.id ? players.player1 : players.player2
-    );
-    setOpponent(() =>
-      players.player1.id === playerData.id ? players.player2 : players.player1
-    );
-    setGameLoading(() => false);
-  });
-
-  //playersInfo to backend when game starts;
-  useEffect(() => {
-    if (
-      roomName !== null &&
-      you.id !== undefined &&
-      opponent.id !== undefined
-    ) {
-      if (you.id === todoId) {
-        socket.emit("playersInfo", {
-          roomName: roomName,
-          player1Id: you.id,
-          player2Id: opponent.id,
-          player1Color: color,
-          player2Color: color === "white" ? "black" : "white",
-          player1RatingBefore: you.rating,
-          player2RatingBefore: opponent.rating,
-        });
-      }
-    }
-  }, [roomName]);
-
-  const onDrop = (sourceSquare, targetSquare, piece) => {
-    let pieceColor = piece[0] == "w" ? "white" : "black";
-
-    if (pieceColor !== color) {
-      return false;
-    }
-
-    const gameCopy = new Chess(game.fen());
-
-    try {
-      const move = gameCopy.move({
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: piece[1].toLowerCase() ?? "q", // always promote to a queen for example simplicity
-      });
-
-      if (move === null) {
-        return false;
-      }
-
-      socket.emit("newChessPosition", {
-        position: gameCopy.fen(),
-        roomName,
-        player1Id: you.id,
-        player2Id: opponent.id,
-        player1Color: color,
-        player2Color: color == "white" ? "black" : "white",
-      });
-      return true;
-    } catch (error) {
-      console.log("invalid move : ", error);
-      return false;
-    }
-  };
-
-  //backend makeMove
-  socket.on("makeMove", (newPosition) => {
-    setPosition(() => newPosition);
-    setGame(() => new Chess(newPosition));
-  });
+  //   // Cleanup on component unmount
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //   };
+  // }, [todoId, opponent, you, roomName]);
 
   //game over- checkmate or draw to backend./
   useEffect(() => {
@@ -380,6 +195,224 @@ const PlayGame = () => {
     }
   }, [game]);
 
+  //playersInfo to backend when game starts;
+  useEffect(() => {
+    roomNameRef.current = roomName;
+
+    if (
+      roomName !== null &&
+      you.id !== undefined &&
+      opponent.id !== undefined
+    ) {
+      if (you.id === todoId) {
+        socket.emit("playersInfo", {
+          roomName: roomName,
+          player1Id: you.id,
+          player2Id: opponent.id,
+          player1Color: color,
+          player2Color: color === "white" ? "black" : "white",
+          player1RatingBefore: you.rating,
+          player2RatingBefore: opponent.rating,
+        });
+      }
+    }
+  }, [roomName]);
+
+  // Add an event listener for the beforeunload event
+  // window.addEventListener("beforeunload", (event) => {
+  // if (isProcessOngoing) {
+  // event.preventDefault();
+  // event.returnValue = "";
+  // sessionStorage.setItem("resigned", "true");
+  // console.log("beforeunload");
+  // console.log("todoId: ", todoId);
+  // console.log("opponenet : ", opponent);
+
+  // if (!todoId) {
+  //   console.log("todoId is null in window, resigning the game");
+
+  //   socket.emit("userDisconnected", { playerId: playerData.id, roomName });
+  //   // socket.disconnect();
+  //   return;
+  // } else
+  // if (you.id == todoId) {
+  //   console.log("updating todoId and leaving the game");
+  //   socket.emit("updateTodoId", { id: opponent.id, roomName });
+  // }
+  // sessionStorage.setItem("resigned", "true");
+  // handleResignGame();
+  // console.log('re');
+
+  // console.log("user try to reload, resigning the game");
+  // });
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      console.log("when user reloads");
+      // event.preventDefault();
+      // event.returnValue = "";
+      sessionStorage.setItem("resigned", "true");
+      if (!roomNameRef.current) {
+        socket.disconnect();
+        return;
+      }
+      if (!(checkmateRef.current || drawRef.current)) {
+        if (playerData.id === todoIdRef.current) {
+          socket.emit("updateTodoId", {
+            id: opponentRef.current.id,
+            roomName: roomNameRef.current,
+          });
+        }
+        handleResignGame();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Cleanup to remove the listener when the component unmounts
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []); // Empty dependency array ensures it runs once
+
+  //when user reloads
+  // window.addEventListener("beforeunload", (event) => {
+
+  //   console.log('when user reloads');
+
+  //   // if (isProcessOngoing) {
+  //   event.preventDefault();
+  //   event.returnValue = ""; // Required for modern browsers to show the dialog
+
+  //   sessionStorage.setItem("resigned", "true");
+  //   if (!roomNameRef.current) {
+  //     socket.disconnect();
+  //     return;
+  //   }
+
+  //   if (!(checkmateRef.current || drawRef.current)) {
+  //     if (playerData.id === todoIdRef.current) {
+  //       socket.emit("updateTodoId", {
+  //         id: opponentRef.current.id,
+  //         roomName: roomNameRef.current,
+  //       });
+  //     }
+  //     // sessionStorage.setItem("resigned", "true");
+  //     console.log(
+  //       "resigned roomName , playerId : ",
+  //       roomNameRef.current,
+  //       playerData.id
+  //     );
+  //     handleResignGame();
+  //   }
+  //   // }
+  // });
+
+  socket.on("userDisconnectedSuccessfully", (playerId) => {
+    console.log("17-01-2025 playerId: ", playerId);
+    if (checkmate || draw) {
+      socket.disconnect();
+    } else {
+      if (you.id == todoId) {
+        console.log("updating todoId and leaving the game");
+        socket.emit("updateTodoId", { id: opponent.id, roomName });
+      }
+      handleResignGame({ roomName, playerId: opponent.id });
+      socket.disconnect();
+    }
+  });
+
+  //play with stranger , createRoom , joinRoom
+  socket.on("connect", () => {
+    console.log("socket connected");
+    if (mode === "online") {
+      setGameLoading(() => true);
+      socket.emit("playWithStranger", playerData.id);
+    } else {
+      if (mode === "friend-create") {
+        setGameLoading(() => true);
+        socket.emit("createRoom", playerData.id);
+      } else {
+        setEnterCode(() => true);
+      }
+    }
+  });
+
+  socket.on("updateTodoIdFromBackend", (id) => {
+    setTodoId(() => id);
+    console.log("todoId updated: ", id);
+  });
+
+  //ask to enter code
+  socket.on("askToEnterCode", (uniqueCode) => {
+    setAskToEnterCode(true);
+    setGameLoading(() => false);
+    setCode(uniqueCode);
+  });
+
+  //invalid friend code
+  socket.on("invalidCode", () => {
+    console.log("invalid code");
+    setGameLoading(() => false);
+    setError("code", {
+      type: "manual",
+      message: "Invalid Code",
+    });
+  });
+
+  // socket.on("disconnect", () => {
+  //   socket.emit("userDisconnected", { playerId: playerData.id, roomName });
+  // });
+
+  //for any error from backend
+  socket.on("error", (error) => {
+    console.log("error : ", error);
+    setGameLoading(() => false);
+    setOpponentResigned(() => false);
+    setResignGameMsg(() => false);
+  });
+
+  //waiting for a player
+  socket.on("WaitingForAPlayer", (roomName) => {
+    setGameLoading(() => false);
+    console.log("Waiting for a player to join: ", roomName);
+  });
+
+  //start the game
+  socket.on("startTheGame", async (players) => {
+    console.log("roomName : ", players.roomName);
+    // console.log("player1 : ", players.player1);
+    // console.log("player2 : ", players.player2);
+
+    console.log("todoId: ", players.todoId);
+
+    todoIdRef.current = players.todoId;
+    setTodoId(players.todoId);
+    setAskToEnterCode(() => false);
+    setEnterCode(() => false);
+    setRoomName(() => players.roomName);
+    setColor(() =>
+      players.player1.id === playerData.id
+        ? players.player1.color
+        : players.player2.color
+    );
+    setYou(() =>
+      players.player1.id === playerData.id ? players.player1 : players.player2
+    );
+    setOpponent(() =>
+      players.player1.id === playerData.id ? players.player2 : players.player1
+    );
+    opponentRef.current =
+      players.player1.id === playerData.id ? players.player2 : players.player1;
+    setGameLoading(() => false);
+  });
+
+  //backend makeMove
+  socket.on("makeMove", (newPosition) => {
+    setPosition(() => newPosition);
+    setGame(() => new Chess(newPosition));
+  });
+
   // backend itsCheckmate
   socket.on(
     "itsCheckmate",
@@ -398,6 +431,7 @@ const PlayGame = () => {
         opponent.id === player1Id ? player1RatingAfter : player2RatingAfter
       );
       setCheckmate(() => true);
+      checkmateRef.current = true;
 
       dispatch(
         updatePlayerRating(
@@ -406,8 +440,9 @@ const PlayGame = () => {
       );
 
       console.log("disconnected");
-      socket.emit("userDisconnected", { playerId: playerData.id, roomName });
+      socket.emit("gameOverClearWaitings", you.id);
       setGameLoading(() => false);
+      socket.disconnect();
     }
   );
 
@@ -436,19 +471,15 @@ const PlayGame = () => {
       );
 
       setDraw(() => true);
+      drawRef.current = true;
 
-      socket.emit("userDisconnected", playerData.id);
+      socket.emit("gameOverClearWaitings", you.id);
       setGameLoading(() => false);
+      socket.disconnect();
     }
   );
 
-  const handleResignGame = () => {
-    console.log("resigning the game");
-
-    setResignGameMsg(() => false);
-    socket.emit("resignGame", { roomName, playerId: playerData.id });
-  };
-
+  //backend
   socket.on("resignedGame", ({ roomName, playerId }) => {
     console.log("resignedGame : ", roomName, playerId);
 
@@ -457,7 +488,7 @@ const PlayGame = () => {
       if (you.id === playerId) {
         console.log("you resigned the game");
       } else {
-        console.log("here");
+        console.log("opponent resigned the game");
         setOpponentResigned(() => true);
       }
       setGameLoading(() => true);
@@ -512,6 +543,59 @@ const PlayGame = () => {
 
     return pieceComponents;
   }, []);
+
+  //join room
+  const handleEnteredCode = ({ code }) => {
+    console.log("entered code : ", code);
+    setGameLoading(() => true);
+    socket.emit("joinRoom", { code, playerId: playerData.id });
+  };
+
+  const onDrop = (sourceSquare, targetSquare, piece) => {
+    let pieceColor = piece[0] == "w" ? "white" : "black";
+
+    if (pieceColor !== color) {
+      return false;
+    }
+
+    const gameCopy = new Chess(game.fen());
+
+    try {
+      const move = gameCopy.move({
+        from: sourceSquare,
+        to: targetSquare,
+        promotion: piece[1].toLowerCase() ?? "q", // always promote to a queen for example simplicity
+      });
+
+      if (move === null) {
+        return false;
+      }
+
+      socket.emit("newChessPosition", {
+        position: gameCopy.fen(),
+        roomName,
+        player1Id: you.id,
+        player2Id: opponent.id,
+        player1Color: color,
+        player2Color: color == "white" ? "black" : "white",
+      });
+      return true;
+    } catch (error) {
+      console.log("invalid move : ", error);
+      return false;
+    }
+  };
+
+  //working handleResignGame
+  const handleResignGame = () => {
+    console.log("resigning the game");
+
+    setResignGameMsg(() => false);
+    socket.emit("resignGame", {
+      roomName: roomNameRef.current,
+      playerId: playerData.id,
+    });
+  };
 
   const handleCleanUp = () => {
     socket.emit("userDisconnected", { playerId: playerData.id, roomName });
