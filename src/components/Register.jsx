@@ -5,7 +5,7 @@ import { register as registerPlayer } from "../store/features/authSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import chessImage from "../assets/chess-image2.jpg";
+import chessImage from "../assets/chess-image.jpg";
 
 const Register = () => {
   const { loading } = useSelector((state) => state.auth);

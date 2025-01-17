@@ -11,9 +11,9 @@ export const getCurrentPlayer = createAsyncThunk(
       const response = await axiosInstance.get("/players/get-current-player");
       return response.data;
     } catch (error) {
-      toast.error(
-        error?.response?.data?.message || "Failed to get current player"
-      );
+      // toast.error(
+      //   error?.response?.data?.message || "Failed to get current player"
+      // );
     }
   }
 );
@@ -153,9 +153,9 @@ export const refreshAccessToken = createAsyncThunk(
       const response = await axiosInstance.get("/players/refresh-access-token");
       return response.data;
     } catch (error) {
-      toast.error(
-        error?.response?.data?.message || "Failed to refresh access token"
-      );
+      // toast.error(
+      //   error?.response?.data?.message || "Failed to refresh access token"
+      // );
     }
   }
 );

@@ -201,7 +201,7 @@ const PlayerProfile = () => {
                           className={`text-start w-56 md:w-auto ${
                             match.status === "finished"
                               ? "text-green-400"
-                              : "text-yellow-300"
+                              : "text-yellow-200"
                           }`}
                         >
                           <span className="text-gray-300 text-center font-semibold">

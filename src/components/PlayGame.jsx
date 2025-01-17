@@ -72,10 +72,11 @@ const PlayGame = () => {
     }
   };
 
+  // console.log("todoId changes: ", todoId);
+  // console.log("opponent changes : ", opponent);
+
   //login check and socket connection
   useEffect(() => {
-    console.log("todoId changes: ", todoId);
-
     console.log("resigned: ", sessionStorage.getItem("resigned"));
 
     if (sessionStorage.getItem("resigned") == "true") {
@@ -87,30 +88,42 @@ const PlayGame = () => {
       navigate("/login");
     }
     if (loginStatus === true && loading === false) {
-      requestFullscreen();
+      // requestFullscreen();
       console.log("user connected");
       socket.connect();
       return () => {
         console.log("cleanup");
-        sessionStorage.setItem("resigned", "true");
-        // console.log("beforeunload");
-        // console.log("todoId: ", todoId);
-
-        // if (!todoId) {
-        //   console.log('todoId is null, resigning the game');
-
-        //   socket.emit("userDisconnected", playerData.id)
-        //   return;
-        // } else if (you.id == todoId) {
-        //   console.log("updating todoId and leaving the game");
-        //   socket.emit("updateTodoId", { id: opponent.id, roomName });
-        // }
-        // handleResignGame();
-        // socket.emit("userDisconnected", playerData.id);
-        // socket.disconnect();
+        socket.emit("userDisconnected", { playerId: playerData.id, roomName });
       };
     }
   }, [loginStatus, loading, navigate]);
+
+  //running fine
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      console.log("beforeunload");
+      console.log("todoId: ", todoId);
+      console.log("opponent: ", opponent);
+
+      if (you.id == todoId) {
+        console.log("updating todoId and leaving the game");
+        socket.emit("updateTodoId", { id: opponent.id, roomName });
+      }
+      sessionStorage.setItem("resigned", "true");
+      handleResignGame();
+
+      // To trigger the browser's built-in confirmation dialog
+      event.preventDefault();
+      event.returnValue = ""; // Chrome requires returnValue to be set
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Cleanup on component unmount
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [todoId, opponent, you, roomName]);
 
   // Add an event listener for the beforeunload event
   window.addEventListener("beforeunload", (event) => {
@@ -119,27 +132,59 @@ const PlayGame = () => {
     event.returnValue = "";
     // sessionStorage.setItem("resigned", "true");
     console.log("beforeunload");
+    console.log("todoId: ", todoId);
+    console.log("opponenet : ", opponent);
 
-    if (!todoId) {
-      console.log("todoId is null in window, resigning the game");
+    // if (!todoId) {
+    //   console.log("todoId is null in window, resigning the game");
 
-      socket.emit("userDisconnected", playerData.id);
-      // socket.disconnect();
-      return;
-    } else if (you.id == todoId) {
+    //   socket.emit("userDisconnected", { playerId: playerData.id, roomName });
+    //   // socket.disconnect();
+    //   return;
+    // } else
+    if (you.id == todoId) {
       console.log("updating todoId and leaving the game");
       socket.emit("updateTodoId", { id: opponent.id, roomName });
     }
+    sessionStorage.setItem("resigned", "true");
     handleResignGame();
     // console.log('re');
 
     // console.log("user try to reload, resigning the game");
   });
 
-  socket.on("userDisconnectedSuccessfully", (msg) => {
+  socket.on("userDisconnectedSuccessfully", (playerId) => {
     console.log(msg);
-    socket.disconnect();
+    if (playerId === opponent.id) {
+      setOpponentResigned(() => true);
+    } else if (
+      !game.isCheckmate() &&
+      !(
+        game.isStalemate() ||
+        game.isThreefoldRepetition() ||
+        game.isInsufficientMaterial()
+      )
+    ) {
+      handleResignGame();
+      // socket.disconnect();
+    }
+    else{
+      socket.disconnect();
+    }
   });
+
+  // useEffect(() => {
+  //   if (
+  //     opponentResigned === true &&
+  //     !game.isCheckmate() &&
+  //     !(
+  //       game.isStalemate() ||
+  //       game.isThreefoldRepetition() ||
+  //       game.isInsufficientMaterial()
+  //     )
+  //   ) {
+  //   }
+  // }, [opponentResigned]);
 
   //play with stranger , createRoom , joinRoom
   socket.on("connect", () => {
@@ -187,7 +232,7 @@ const PlayGame = () => {
   });
 
   socket.on("disconnect", () => {
-    socket.emit("userDisconnected", playerData.id);
+    socket.emit("userDisconnected", { playerId: playerData.id, roomName });
   });
 
   //for any error from backend
@@ -361,9 +406,8 @@ const PlayGame = () => {
       );
 
       console.log("disconnected");
-      socket.emit("userDisconnected", playerData.id);
+      socket.emit("userDisconnected", { playerId: playerData.id, roomName });
       setGameLoading(() => false);
-      // socket.disconnect();
     }
   );
 
@@ -395,7 +439,6 @@ const PlayGame = () => {
 
       socket.emit("userDisconnected", playerData.id);
       setGameLoading(() => false);
-      socket.disconnect();
     }
   );
 
@@ -423,7 +466,7 @@ const PlayGame = () => {
         setStatus(() => (you.id === playerId ? "Lost" : "Won"));
 
         if (you.id === todoId) {
-          // console.log("checkmate from down here");
+          console.log("checkmate from down here");
 
           socket.emit("checkmate", {
             roomName,
@@ -431,7 +474,7 @@ const PlayGame = () => {
             losserId: playerId,
           });
         }
-      }, 2000);
+      }, 3000);
     }
   });
 
@@ -450,6 +493,7 @@ const PlayGame = () => {
     "bQ",
     "bK",
   ];
+
   const customPieces = useMemo(() => {
     const pieceComponents = {};
     pieces.forEach((piece) => {
@@ -470,8 +514,7 @@ const PlayGame = () => {
   }, []);
 
   const handleCleanUp = () => {
-    socket.emit("userDisconnected", playerData.id);
-    // socket.disconnect();
+    socket.emit("userDisconnected", { playerId: playerData.id, roomName });
     navigate("/");
   };
 
