@@ -99,7 +99,7 @@ const Home = () => {
         </section>
 
         {/* Right Section */}
-        <section className="w-full min-h-screen flex flex-col py-2 items-center justify-between">
+        <section className="w-full min-h-screen flex flex-col pt-2 items-center justify-between">
           {/* Header */}
           <div className="flex w-full justify-between items-center pl-2 pr-4">
             <div className="text-gray-200 flex">

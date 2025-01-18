@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo, useRef, forwardRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
@@ -61,6 +61,8 @@ const PlayGame = () => {
   const todoIdRef = useRef(null);
   const opponentRef = useRef({});
 
+  const [squareWidth, setSquareWidth] = useState(70); // Default square width
+  const chessboardRef = useRef(null);
   // full screen
   const requestFullscreen = () => {
     const doc = document.documentElement;
@@ -90,18 +92,21 @@ const PlayGame = () => {
       navigate("/login");
     }
     if (loginStatus === true && loading === false) {
-      // requestFullscreen();
+      requestFullscreen();
       console.log("user connected");
       socket.connect();
       //when user goes back <-
       return () => {
-        console.log("cleanup from login useEffect");
-        console.log("roomName: ", roomNameRef.current);
-        console.log("todoId: ", todoIdRef.current);
-        console.log("opponentId: ", opponentRef.current.Id);
+        // console.log("cleanup from login useEffect");
+        // console.log("roomName: ", roomNameRef.current);
+        // console.log("todoId: ", todoIdRef.current);
+        // console.log("opponentId: ", opponentRef.current.Id);
 
         sessionStorage.setItem("resigned", "true");
         if (!roomNameRef.current) {
+          console.log("playerData.id: ", playerData.id);
+
+          socket.emit("gameOverClearWaitings", playerData.id);
           socket.disconnect();
           return;
         }
@@ -114,16 +119,32 @@ const PlayGame = () => {
             });
           }
           // sessionStorage.setItem("resigned", "true");
-          console.log(
-            "resigned roomName , playerId : ",
-            roomNameRef.current,
-            playerData.id
-          );
+          // console.log(
+          //   "resigned roomName , playerId : ",
+          //   roomNameRef.current,
+          //   playerData.id
+          // );
           handleResignGame();
         }
       };
     }
   }, [loginStatus, loading, navigate]);
+
+  useEffect(() => {
+    const updateSquareWidth = () => {
+      if (chessboardRef.current) {
+        const boardWidth = chessboardRef.current.offsetWidth;
+        setSquareWidth(boardWidth / 8); // 8 squares per row
+      }
+    };
+
+    updateSquareWidth(); // Initialize square width
+    window.addEventListener("resize", updateSquareWidth); // Update on window resize
+
+    return () => {
+      window.removeEventListener("resize", updateSquareWidth); // Cleanup event listener
+    };
+  }, []);
 
   //running fine
   // useEffect(() => {
@@ -218,34 +239,7 @@ const PlayGame = () => {
     }
   }, [roomName]);
 
-  // Add an event listener for the beforeunload event
-  // window.addEventListener("beforeunload", (event) => {
-  // if (isProcessOngoing) {
-  // event.preventDefault();
-  // event.returnValue = "";
-  // sessionStorage.setItem("resigned", "true");
-  // console.log("beforeunload");
-  // console.log("todoId: ", todoId);
-  // console.log("opponenet : ", opponent);
-
-  // if (!todoId) {
-  //   console.log("todoId is null in window, resigning the game");
-
-  //   socket.emit("userDisconnected", { playerId: playerData.id, roomName });
-  //   // socket.disconnect();
-  //   return;
-  // } else
-  // if (you.id == todoId) {
-  //   console.log("updating todoId and leaving the game");
-  //   socket.emit("updateTodoId", { id: opponent.id, roomName });
-  // }
-  // sessionStorage.setItem("resigned", "true");
-  // handleResignGame();
-  // console.log('re');
-
-  // console.log("user try to reload, resigning the game");
-  // });
-
+  //resign when reload
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       console.log("when user reloads");
@@ -253,6 +247,7 @@ const PlayGame = () => {
       // event.returnValue = "";
       sessionStorage.setItem("resigned", "true");
       if (!roomNameRef.current) {
+        socket.emit("gameOverClearWaitings", playerData.id);
         socket.disconnect();
         return;
       }
@@ -273,40 +268,7 @@ const PlayGame = () => {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, []); // Empty dependency array ensures it runs once
-
-  //when user reloads
-  // window.addEventListener("beforeunload", (event) => {
-
-  //   console.log('when user reloads');
-
-  //   // if (isProcessOngoing) {
-  //   event.preventDefault();
-  //   event.returnValue = ""; // Required for modern browsers to show the dialog
-
-  //   sessionStorage.setItem("resigned", "true");
-  //   if (!roomNameRef.current) {
-  //     socket.disconnect();
-  //     return;
-  //   }
-
-  //   if (!(checkmateRef.current || drawRef.current)) {
-  //     if (playerData.id === todoIdRef.current) {
-  //       socket.emit("updateTodoId", {
-  //         id: opponentRef.current.id,
-  //         roomName: roomNameRef.current,
-  //       });
-  //     }
-  //     // sessionStorage.setItem("resigned", "true");
-  //     console.log(
-  //       "resigned roomName , playerId : ",
-  //       roomNameRef.current,
-  //       playerData.id
-  //     );
-  //     handleResignGame();
-  //   }
-  //   // }
-  // });
+  }, []);
 
   socket.on("userDisconnectedSuccessfully", (playerId) => {
     console.log("17-01-2025 playerId: ", playerId);
@@ -359,10 +321,6 @@ const PlayGame = () => {
       message: "Invalid Code",
     });
   });
-
-  // socket.on("disconnect", () => {
-  //   socket.emit("userDisconnected", { playerId: playerData.id, roomName });
-  // });
 
   //for any error from backend
   socket.on("error", (error) => {
@@ -510,39 +468,40 @@ const PlayGame = () => {
   });
 
   //custom chess pieces
-  const pieces = [
-    "wP",
-    "wN",
-    "wB",
-    "wR",
-    "wQ",
-    "wK",
-    "bP",
-    "bN",
-    "bB",
-    "bR",
-    "bQ",
-    "bK",
-  ];
-
   const customPieces = useMemo(() => {
+    const pieces = [
+      "wP",
+      "wN",
+      "wB",
+      "wR",
+      "wQ",
+      "wK",
+      "bP",
+      "bN",
+      "bB",
+      "bR",
+      "bQ",
+      "bK",
+    ];
     const pieceComponents = {};
+
     pieces.forEach((piece) => {
-      pieceComponents[piece] = ({ squareWidth = 10 }) => (
+      pieceComponents[piece] = ({ squareWidth = 70 }) => (
         <div
           style={{
-            width: squareWidth,
-            height: squareWidth,
+            width: squareWidth, // Dynamically sized based on square width
+            height: squareWidth, // Keep it square
             backgroundImage: `url(/assets/${piece}.svg)`,
-            backgroundSize: "100%",
+            backgroundSize: "contain", // Ensure it fits within the square
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
           }}
         />
       );
     });
-    console.log("pieceComponents : ", pieceComponents);
 
     return pieceComponents;
-  }, []);
+  }, []); // Ensure it updates only when `pieces` changes
 
   //join room
   const handleEnteredCode = ({ code }) => {
@@ -714,10 +673,11 @@ const PlayGame = () => {
                   </label>
                   <Input
                     {...register("code", { required: true })}
-                    type="text"
+                    type="number"
                     autoFocus
                     placeholder="Enter your code"
-                    className="w-full p-2 border rounded-md bg-slate-100 focus:outline-none focus:ring-2 text-slate-800 placeholder:text-slate-400"
+                    bgColor="bg-slate-200"
+                    className="w-full p-2 border appearance-none rounded-md bg-slate-100 focus:outline-none focus:ring-2 text-slate-800 placeholder:text-slate-400"
                   />
                   {errors.code && (
                     <p className="text-red-500 text-sm mt-1">
@@ -743,7 +703,7 @@ const PlayGame = () => {
         </>
       )}
       {!checkmate && !draw && (
-        <div className="h-screen w-screen flex flex-col items-center justify-center">
+        <div className="h-screen min-w-screen flex flex-col items-center justify-center">
           {loading && <CenterSpinner />}
           {mode === "online" && !opponent.handle && (
             <>
@@ -781,8 +741,10 @@ const PlayGame = () => {
                     count as a loss.
                   </p>
                   <button
-                    onClick={() => {
-                      handleResignGame();
+                    // onClick={handleResignGame}
+                    onClick={(event) => {
+                      event.stopPropagation(); // Prevent bubbling
+                      handleResignGame(); // Call the handler safely
                     }}
                     className="mb-4 w-32 px-4 py-2  text-white bg-red-500 rounded hover:bg-red-600"
                   >
@@ -807,60 +769,52 @@ const PlayGame = () => {
             </>
           )}
           {!loading && !gameLoading && opponent.handle && (
-            <div className="w-[600px] p-4 mx-auto flex flex-col">
-              <p className="text-center ilatic text-lg text-white font-semibold">
-                {opponent.handle.toUpperCase()} : RATING {opponent.rating}
+            <div className="w-full px-4 mx-auto flex flex-col max-h-screen">
+              <p className="text-center italic text-lg text-white font-semibold mb-2">
+                {opponent.handle} : RATING {opponent.rating}
               </p>
-              <Chessboard
-                id="PlayVsRandom"
-                position={position}
-                onPieceDrop={onDrop}
-                boardOrientation={color}
-                // customBoardStyle={{
-                //   borderRadius: "4px",
-                //   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-                //   width: "100%",
-                //   height: "100%",
-                //   minWidth: "300px", // Minimum size for usability
-                //   minHeight: "300px",
-                //   maxWidth: "550px",
-                //   maxHeight: "550px",
-                //   position: "relative",
-                // }}
-                customBoardStyle={{
-                  borderRadius: "8px", // Slightly rounded corners for a modern look
-                  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.7)", // Enhanced shadow for depth
-                  width: "100%",
-                  height: "100%",
-                  minWidth: "300px",
-                  minHeight: "300px",
-                  maxWidth: "550px",
-                  maxHeight: "550px",
-                  overflow: "hidden", // Hide pieces that go beyond the board
-                  backgroundColor: "#f0d9b5", // Light tan background
-                }}
-                customDarkSquareStyle={{
-                  backgroundColor: "#31363F",
-                }}
-                customLightSquareStyle={{
-                  backgroundColor: "#d9d7b6",
-                }}
-                customPieces={customPieces}
-                //prevent page scrolling when dragging pieces
-                onPieceDragBegin={(piece, sourceSquare) => {
-                  document.body.style.overflow = "hidden";
-                }}
-                onPieceDragEnd={(piece, sourceSquare, targetSquare) => {
-                  document.body.style.overflow = ""; // Restore scrolling
-                }}
-              />
-              <Button
-                text={"Resign the Game"}
-                onClick={() => setResignGameMsg(true)}
-                className={
-                  "bg-red-500 text-white w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm"
-                }
-              />
+
+              <div
+                ref={chessboardRef}
+                // style={{ width: "100%", height: "100%" }}
+                className="w-full h-full max-w-[510px] mx-auto max-h-[510px] flex-col justify-center items-center"
+              >
+                <Chessboard
+                  id="PlayVsRandom"
+                  position={position}
+                  onPieceDrop={onDrop}
+                  boardOrientation={color}
+                  customBoardStyle={{
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.7)",
+                    width: "100%",
+                    height: "100%",
+                    maxWidth: "90vw",
+                    maxHeight: "90vh",
+                    minWidth: "200px",
+                    minHeight: "200px",
+                    backgroundColor: "#f0d9b5",
+                  }}
+                  // customSquare={CustomSquareRenderer}
+                  customDarkSquareStyle={{
+                    backgroundColor: "#31363F",
+                    width: squareWidth, // Dynamically set width
+                    height: squareWidth, // Dynamically set height
+                  }}
+                  customLightSquareStyle={{
+                    backgroundColor: "#d9d7b6",
+                    width: squareWidth, // Dynamically set width
+                    height: squareWidth, // Dynamically set height
+                  }}
+                  customPieces={customPieces}
+                  onPieceDragBegin={(piece, sourceSquare) => {
+                    document.body.style.overflow = "hidden";
+                  }}
+                  onPieceDragEnd={(piece, sourceSquare, targetSquare) => {
+                    document.body.style.overflow = ""; // Restore scrolling
+                  }}
+                />
+              </div>
             </div>
           )}
         </div>

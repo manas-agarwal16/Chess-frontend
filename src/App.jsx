@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, forwardRef } from "react";
 import "./App.css";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { getCurrentPlayer , refreshAccessToken } from "./store/features/authSlice.js";
+import {
+  getCurrentPlayer,
+  refreshAccessToken,
+} from "./store/features/authSlice.js";
 
 const App = () => {
   const navigate = useNavigate();
@@ -22,11 +25,9 @@ const App = () => {
       }
     })();
   }, [dispatch]);
-
   return (
-    <div className="bg-gray-800 min-h-screen selection:bg-[#a45633]">
-      <Outlet />
-    </div>
+    // <div className="bg-gray-800 min-h-screen border-blue-500 selection:bg-[#a45633]">
+    <Outlet />
   );
 };
 
