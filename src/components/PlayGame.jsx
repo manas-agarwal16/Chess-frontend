@@ -769,51 +769,61 @@ const PlayGame = () => {
             </>
           )}
           {!loading && !gameLoading && opponent.handle && (
-            <div className="w-full px-4 mx-auto flex flex-col max-h-screen">
-              <p className="text-center italic text-lg text-white font-semibold mb-2">
-                {opponent.handle} : RATING {opponent.rating}
-              </p>
+            <div className="w-full h-full flex-col justify-center items-center">
+              <Button
+                bgColor="bg-gray-950"
+                text={"Resign"}
+                width="w-24"
+                onClick={() => setResignGameMsg(true)}
+                className={`absolute top-2 right-2 text-sm border-2 border-gray-400 px-2 py-2 text-slate-200`}
+              />
+              <div className="w-full px-4 mx-auto flex flex-col justify-center items-center h-screen">
+                <p className="text-center italic text-lg text-white font-semibold mb-2">
+                  {opponent.handle?.toUpperCase()} : RATING {opponent.rating}
+                </p>
 
-              <div
-                ref={chessboardRef}
-                // style={{ width: "100%", height: "100%" }}
-                className="w-full h-full max-w-[510px] mx-auto max-h-[510px] flex-col justify-center items-center"
-              >
-                <Chessboard
-                  id="PlayVsRandom"
-                  position={position}
-                  onPieceDrop={onDrop}
-                  boardOrientation={color}
-                  customBoardStyle={{
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.7)",
-                    width: "100%",
-                    height: "100%",
-                    maxWidth: "90vw",
-                    maxHeight: "90vh",
-                    minWidth: "200px",
-                    minHeight: "200px",
-                    backgroundColor: "#f0d9b5",
-                  }}
-                  // customSquare={CustomSquareRenderer}
-                  customDarkSquareStyle={{
-                    backgroundColor: "#31363F",
-                    width: squareWidth, // Dynamically set width
-                    height: squareWidth, // Dynamically set height
-                  }}
-                  customLightSquareStyle={{
-                    backgroundColor: "#d9d7b6",
-                    width: squareWidth, // Dynamically set width
-                    height: squareWidth, // Dynamically set height
-                  }}
-                  customPieces={customPieces}
-                  onPieceDragBegin={(piece, sourceSquare) => {
-                    document.body.style.overflow = "hidden";
-                  }}
-                  onPieceDragEnd={(piece, sourceSquare, targetSquare) => {
-                    document.body.style.overflow = ""; // Restore scrolling
-                  }}
-                />
+                <div
+                  ref={chessboardRef}
+                  // style={{ width: "100%", height: "100%" }}
+                  className="w-full h-full max-w-[510px] mx-auto max-h-[510px] flex-col justify-center items-center"
+                >
+                  <Chessboard
+                    id="PlayVsRandom"
+                    position={position}
+                    onPieceDrop={onDrop}
+                    boardOrientation={color}
+                    customBoardStyle={{
+                      borderRadius: "8px",
+                      // borderWidth: "2px",
+                      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.7)",
+                      width: "100%",
+                      height: "100%",
+                      maxWidth: "90vw",
+                      maxHeight: "90vh",
+                      minWidth: "200px",
+                      minHeight: "200px",
+                      backgroundColor: "#f0d9b5",
+                    }}
+                    // customSquare={CustomSquareRenderer}
+                    customDarkSquareStyle={{
+                      backgroundColor: "#31363F",
+                      width: squareWidth, // Dynamically set width
+                      height: squareWidth, // Dynamically set height
+                    }}
+                    customLightSquareStyle={{
+                      backgroundColor: "#d9d7b6",
+                      width: squareWidth, // Dynamically set width
+                      height: squareWidth, // Dynamically set height
+                    }}
+                    customPieces={customPieces}
+                    onPieceDragBegin={(piece, sourceSquare) => {
+                      document.body.style.overflow = "hidden";
+                    }}
+                    onPieceDragEnd={(piece, sourceSquare, targetSquare) => {
+                      document.body.style.overflow = ""; // Restore scrolling
+                    }}
+                  />
+                </div>
               </div>
             </div>
           )}
