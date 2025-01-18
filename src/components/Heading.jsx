@@ -1,14 +1,17 @@
 import React from "react";
 
-const Heading = ({ className, img = true, ...props }) => {
+const Heading = ({className, img = true, ...props }) => {
+  let classProperties;
+  if (!className) {
+    classProperties = `text-3xl font-bold pt-4 px-0 mx-0 text-[#A0522D] ${
+      img == true ? "pl-8 md:text-5xl" : ""
+    } ${className}`;
+  } else {
+    classProperties = className;
+  }
   return (
     <div className="flex text-center items-center justify-center">
-      <h1
-        {...props}
-        className={`text-3xl font-bold pt-4 px-0 mx-0 text-[#A0522D] ${
-          img == true ? "pl-8 md:text-5xl" : ""
-        } ${className}`}
-      >
+      <h1 {...props} className={classProperties}>
         Chess Master
       </h1>
       {img && (

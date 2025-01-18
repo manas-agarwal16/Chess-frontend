@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { login as loginPlayer } from "../store/features/authSlice.js";
 import { Link } from "react-router-dom";
-import chessImage from "../assets/chess-image.jpg";
+import chessImage from "../assets/chessmasterHomeImage.jpg";
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -31,9 +31,8 @@ const Login = () => {
     <div className="flex min-h-screen w-screen">
       <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-4/5 min-h-[50vh] w-full p-0 items-center justify-center hidden">
         <img
-          className="w-full h-full shadow-lg"
+          className="filter brightness-75 w-full h-[50vh] lg:h-full object-cover shadow-2xl object-center"
           src={chessImage}
-          alt="chess-image"
         />
       </section>
       <section className="w-full min-h-screen flex flex-col px-6 items-center justify-between">

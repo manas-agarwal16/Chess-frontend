@@ -566,7 +566,7 @@ const PlayGame = () => {
       {gameLoading && !opponentResigned && <CenterSpinner />}
       {(checkmate || draw) && (
         <>
-          <div className="h-screen bg- w-full border-4 border-gray-700 flex items-center justify-center">
+          <div className="h-screen bg- w-full  flex items-center justify-center">
             {/* Player Info Section */}
             <div
               className={`flex flex-col items-center justify-center space-y-6 p-6 bg-gray-300 shadow-lg rounded-lg w-1/3 ${
@@ -727,7 +727,7 @@ const PlayGame = () => {
 
               {/* Square with Buttons (Friend Box) */}
               <div className="fixed inset-0 flex items-center justify-center z-20">
-                <div className="relative w-72 h-72 bg-[#DEB887] rounded-lg shadow-lg flex flex-col items-center justify-center">
+                <div className="relative w-72 h-72 bg-gray-950 text-gray-300 rounded-lg shadow-lg flex flex-col items-center justify-center">
                   {/* Close Button */}
                   <button
                     onClick={() => setResignGameMsg(false)}
@@ -736,20 +736,21 @@ const PlayGame = () => {
                     &times;
                   </button>
                   {/* Modal Content */}
-                  <p className="text-gray-900 text-lg font-semibold text-center">
-                    Warning! Resigning the game will affect your rating and
-                    count as a loss.
+                  <p className="p-3 text-lg font-semibold text-center mb-2">
+                    <span className="text-red-600">WARNING!</span> Resigning the
+                    game will affect your rating and count as a loss.
                   </p>
-                  <button
+                  <Button
                     // onClick={handleResignGame}
                     onClick={(event) => {
                       event.stopPropagation(); // Prevent bubbling
                       handleResignGame(); // Call the handler safely
                     }}
-                    className="mb-4 w-32 px-4 py-2  text-white bg-red-500 rounded hover:bg-red-600"
-                  >
-                    Resign the Game
-                  </button>
+                    bgColor="bg-gray-950"
+                    text={"Resign"}
+                    width="w-24"
+                    className="text-sm border-2 border-gray-400 px-2 py-2 text-slate-200"
+                  />
                 </div>
               </div>
             </>
@@ -761,9 +762,12 @@ const PlayGame = () => {
 
               {/* Square with Buttons (Friend Box) */}
               <div className="fixed inset-0 flex items-center justify-center z-20">
-                <div className="relative w-72 h-72 bg-[#DEB887] rounded-lg shadow-lg flex flex-col items-center justify-center">
+                <div className="relative w-72 h-72 bg-[#BC8F8F] rounded-lg shadow-lg flex flex-col items-center justify-center">
                   {/* Close Button */}
-                  <p>{opponent.handle} has resigned the game. You Won!!! 🎉</p>
+                  <p className="text-center p-3 text-lg font-semibold text-gray-200">
+                    {opponent.handle?.toUpperCase()} has resigned the game. You
+                    Won!!! 🎉
+                  </p>
                 </div>
               </div>
             </>

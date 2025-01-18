@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
-import chessImage2 from "../assets/chess-image2.jpg";
+import React, { useEffect, useState, useRef } from "react";
+// import chessImage2 from "../assets/chess-image2.jpg";
+import chessImage2 from "../assets/chessmasterHomeImage.jpg";
 import { Button, CenterSpinner, Heading } from "./index.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout, fetchPlayerRating } from "../store/features/authSlice.js";
-import { axiosInstance } from "../utils/axiosInstance.js";
+import { FaSearch } from "react-icons/fa";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -15,6 +16,22 @@ const Home = () => {
   const { loginStatus, loading, playerData } = useSelector(
     (state) => state.auth
   );
+  const [showSearch, setShowSearch] = useState(false); // Track search bar visibility
+  const searchBarRef = useRef(null); // Reference for the search bar
+
+  // Close search bar when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (searchBarRef.current && !searchBarRef.current.contains(e.target)) {
+        setShowSearch(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
   useEffect(() => {
     sessionStorage.setItem("resigned", "false");
@@ -45,6 +62,14 @@ const Home = () => {
 
   const playerProfile = async () => {
     navigate(`/profile/${playerData?.handle}`);
+  };
+
+  const handleSearchHandle = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      console.log("searching handle...");
+      navigate(`profile/${e.target.value}`);
+    }
   };
 
   return (
@@ -92,7 +117,7 @@ const Home = () => {
         {/* Left Section */}
         <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-3/4 min-h-[50vh] p-0 items-center justify-center hidden">
           <img
-            className="w-full h-[50vh] lg:h-full object-cover shadow-2xl object-center"
+            className="filter brightness-90 w-full h-[50vh] lg:h-full object-cover shadow-2xl object-center"
             src={chessImage2}
             alt="chess-image"
           />
@@ -101,16 +126,48 @@ const Home = () => {
         {/* Right Section */}
         <section className="w-full min-h-screen flex flex-col pt-2 items-center justify-between">
           {/* Header */}
-          <div className="flex w-full justify-between items-center pl-2 pr-4">
+          <div className="flex w-full justify-between items-center mb-6 pl-2 pr-4 relative">
+            {/* Rating Display */}
             <div className="text-gray-200 flex">
               <span className="text-[#F4A460] inline">Rating:</span>{" "}
               <span className="ml-1">{playerData?.rating}</span>
             </div>
+
+            {/* Search Bar for Larger Screens */}
             <input
-              className="rounded-lg text-[#1E5162] border-blue-300 border-2 bg-gray-400 placeholder:text-slate-200 px-2 outline-none py-2 text-md w-80 md:w-80 font-sans"
+              className="hidden md:block rounded-lg text-[#1E5162] border-blue-300 border-2 bg-gray-400 placeholder:text-slate-200 px-2 outline-none py-1 text-md w-80 font-sans"
               type="text"
               placeholder="search handle..."
+              onKeyDown={handleSearchHandle}
             />
+
+            {/* Search Icon for Mobile */}
+            <div className="md:hidden flex items-center cursor-pointer">
+              <FaSearch
+                size={20}
+                className="text-gray-200 hover:text-[#F4A460] relative right-4 transition duration-300"
+                onClick={() => setShowSearch((prev) => !prev)} // Toggle search bar
+              />
+            </div>
+
+            {/* Mobile Search Bar */}
+            <div
+              ref={searchBarRef}
+              className={`absolute top-16 left-4 right-4 z-10 transition-transform duration-300 ${
+                showSearch
+                  ? "scale-100 opacity-100"
+                  : "scale-95 opacity-0 pointer-events-none"
+              }`}
+            >
+              <input
+                className="rounded-lg text-[#1E5162] border-blue-300 border-2 bg-gray-400 placeholder:text-slate-200 px-2 outline-none py-2 text-md w-full font-sans"
+                type="text"
+                placeholder="search handle..."
+                onKeyDown={handleSearchHandle}
+              />
+            </div>
+
+            {/* Profile Section */}
             <div className="pl-4 flex flex-col items-center cursor-pointer">
               <img
                 onClick={playerProfile}
@@ -143,7 +200,7 @@ const Home = () => {
               <span className="inline text-white">😉</span>
             </p>
           </div>
-          <div className="flex flex-col items-center justify-center gap-16 sm:gap-10 lg:gap-6">
+          <div className="flex flex-col items-center justify-center gap-6 sm:gap-10 lg:gap-6">
             <Button
               onClick={handlePlayWithStranger}
               className="text-xl border-2 border-[#F4A460] max-w-72 md:max-w-96"

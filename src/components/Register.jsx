@@ -5,7 +5,7 @@ import { register as registerPlayer } from "../store/features/authSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import chessImage from "../assets/chess-image.jpg";
+import chessImage from "../assets/chessmasterHomeImage.jpg";
 
 const Register = () => {
   const { loading } = useSelector((state) => state.auth);
@@ -46,7 +46,7 @@ const Register = () => {
     <div className="flex min-h-screen w-screen">
       <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-4/5 min-h-[50vh] w-full p-0 items-center justify-center hidden">
         <img
-          className="w-full h-full shadow-lg"
+          className="filter brightness-75 w-full h-[50vh] lg:h-full object-cover shadow-2xl object-center"
           src={chessImage}
           alt="chess-image"
         />

@@ -1,72 +1,88 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { axiosInstance } from "../utils/axiosInstance";
-import { set } from "react-hook-form";
 import CenterSpinner from "./CenterSpinner";
+import { Spinner } from "./index.js";
 import Heading from "./Heading";
+import { Link } from "react-router-dom";
 
 const PlayerProfile = () => {
   const { handle } = useParams();
-  console.log("handle : ", handle);
   const [profileNotFound, setProfileNotFound] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileAvatar, setProfileAvatar] = useState(null);
   const [profileHandle, setProfileHandle] = useState(null);
   const [profileEmail, setProfileEmail] = useState(null);
   const [profileRating, setProfileRating] = useState(null);
+  const [matchLoading, setMatchLoading] = useState(false);
   const [matches, setMatches] = useState([]);
+  const [page, setPage] = useState(1);
+  const [more, setMore] = useState(true);
 
   const navigate = useNavigate();
-
   useEffect(() => {
-    (async () => {
+    const fetchMatches = async () => {
       try {
-        setProfileLoading(() => true);
-        let res = await axiosInstance.get(`/players/profile/${handle}`);
-        console.log("res: ", res?.data?.data);
-        if (res?.data?.data === null || res?.data?.data === undefined) {
+        let res = await axiosInstance.get(
+          `/players/profile/${handle}?page=${page}`
+        );
+        res = res?.data?.data;
+        console.log("res.matches: ", res?.matches);
+
+        setMatchLoading(() => false);
+        if (res === null || res === undefined) {
           setProfileLoading(() => false);
           setProfileNotFound(() => true);
-        } else {
-          res = res?.data?.data;
+          return;
+        } else if (page === 1) {
           setProfileLoading(() => false);
           setProfileEmail(() => res.email);
           setProfileHandle(() => res.handle);
           setProfileAvatar(() => res.avatar);
-          setMatches(() => res.matches);
           setProfileRating(() => res.rating);
         }
+        if (res.matches.length < 5) {
+          setMore(false);
+        }
+        setMatches((prev) => [...prev, ...res.matches]);
+        // console.log("res: ", res?.data?.data);
       } catch (error) {
-        console.log("Player not found: ", error);
+        console.log("error fetching matches : ", error);
         setProfileLoading(() => false);
         setProfileNotFound(() => true);
         setTimeout(() => {
           navigate("/");
         }, 1500);
       }
-    })();
-  }, []);
+    };
+    fetchMatches();
+  }, [page]);
+
+  const handleClickMore = () => {
+    setMatchLoading(() => true);
+    setPage((prev) => prev + 1);
+  };
 
   return (
     <>
-      {profileLoading && <CenterSpinner />}
-      {!profileLoading && profileNotFound && (
+      {profileLoading && (
+        <div className="flex justify-center items-center col-span-full">
+          <CenterSpinner width={10} />
+        </div>
+      )}
+      {profileNotFound && (
         <div className="min-h-screen min-w-screen flex justify-center items-center text-2xl text-white font-semibold">
           No player found with this handle.{" "}
         </div>
       )}
       <div>
-        {!profileLoading && (
-          <div className="min-h-screen w-full bg-gray-800 text-gray-200">
-            {/* <span className="border">
-              <Heading
-                onClick={() => navigate("/")}
-                className="p-3 cursor-pointer text-[25px] inline-block"
-              />
-            </span> */}
-            <div onClick={() => navigate('/')} className="absolute cursor-pointer pt-2 px-2 text-center">
-              <img className="h-20 pb-0 mx-auto" src="../assets/bK.svg" alt="" />
-              <Heading img={false} className="text-lg pt-0 my-0 inline-block" />
+        {!profileNotFound && (
+          <div className="min-h-screen w-full text-gray-200">
+            <div
+              onClick={() => navigate("/")}
+              className="absolute cursor-pointer pt-2 px-2 text-center"
+            >
+              <Heading className="text-3xl text-[#A0522D] pt-0 font-semibold my-0 inline-block" />
             </div>
 
             <div className="flex flex-col justify-between px-10">
@@ -213,6 +229,19 @@ const PlayerProfile = () => {
                     </li>
                   );
                 })}
+                {matchLoading && (
+                  <div>
+                    <Spinner />
+                  </div>
+                )}
+                {!matchLoading && more && (
+                  <Link
+                    onClick={handleClickMore}
+                    className="text-blue-400 cursor-pointer relative bottom-2"
+                  >
+                    more...
+                  </Link>
+                )}
               </ul>
             </div>
           </div>

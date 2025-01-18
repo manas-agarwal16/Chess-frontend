@@ -8,5 +8,18 @@ import VerifyOTP from "./VerifyOTP";
 import Heading from "./Heading";
 import PlayGame from "./PlayGame.jsx";
 import PlayerProfile from "./PlayerProfile.jsx";
+import Spinner from "./Spinner.jsx";
 
-export {Home , Button , Input , Login , Register , CenterSpinner , VerifyOTP , Heading , PlayGame , PlayerProfile};
+export {
+  Home,
+  Button,
+  Input,
+  Login,
+  Register,
+  CenterSpinner,
+  VerifyOTP,
+  Heading,
+  PlayGame,
+  PlayerProfile,
+  Spinner,
+};
