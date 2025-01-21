@@ -52,7 +52,7 @@ const VerifyOTP = () => {
       </section>
       <section className="w-full min-h-screen flex flex-col px-6 items-center justify-between">
         <Heading />
-        {loading && <CenterSpinner width={40} />}
+        {loading && <CenterSpinner />}
         <div className="flex justify-center items-center h-full mx-auto w-full px-4 pt-2 text-white">
           <div className="p-4 pb-3 border-[2px] rounded-lg shadow-md text-white max-w-2xl w-full">
             <div className="flex items-center justify-center">
@@ -66,8 +66,10 @@ const VerifyOTP = () => {
                   htmlFor="otp"
                   className="block text-sm font-semibold text-gray-300 mb-2"
                 >
-                  Enter the OTP sent to the email: {" "}
-                  <span className="text-gray-100 underline tracking-wide">{email}</span>
+                  Enter the OTP sent to the email:{" "}
+                  <span className="text-gray-100 underline tracking-wide">
+                    {email}
+                  </span>
                 </label>
                 <Input
                   {...register("OTP", { required: true })}
@@ -81,12 +83,12 @@ const VerifyOTP = () => {
 
               <div className="mb-5">
                 <p className="text-white">
-                  <button
+                  <div
                     className="text-gray-300 underline hover:text-gray-800"
                     onClick={handleResendOTP}
                   >
                     Resend OTP
-                  </button>
+                  </div>
                 </p>
               </div>
 
@@ -94,7 +96,7 @@ const VerifyOTP = () => {
               <Button
                 type="submit"
                 text={"Verify OTP"}
-                bgColor="focus:outline-none focus:ring-2"
+                // bgColor="focus:outline-none focus:ring-2"
                 className="w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm"
               />
             </form>

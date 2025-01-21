@@ -8,6 +8,25 @@ import "../App.css";
 import { Link } from "react-router-dom";
 import { Chessboard } from "react-chessboard";
 import { useSelector } from "react-redux";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend
+);
 
 const PlayerProfile = () => {
   const { handle } = useParams();
@@ -29,6 +48,20 @@ const PlayerProfile = () => {
   const [matchDetails, setMatchDetails] = useState({});
   const [squareWidth, setSquareWidth] = useState(70);
   const chessboardRef = useRef(null);
+
+  //dates and ratings scores for chart
+  const [dates, setDates] = useState([]);
+  const [scores, setScores] = useState([]);
+
+  const ratings = [
+    // { date: "2025-01-01", rating: 1200 },
+    // { date: "2025-01-15", rating: 1250 },
+    // { date: "2025-02-01", rating: 1300 },
+    // { date: "2025-02-15", rating: 1250 },
+  ];
+
+  // const dates = ratings.map((item) => item.date); // Example: ["2025-01-01", "2025-01-10"]
+  // const scores = ratings.map((item) => item.rating); // Example: [1200, 1250, 1300]
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -53,6 +86,8 @@ const PlayerProfile = () => {
           setProfileAvatar(() => res.avatar);
           setProfileRating(() => res.rating);
           setProfileId(() => res.id);
+          setDates(() => res.ratingHistory.map((item) => item.date));
+          setScores(() => res.ratingHistory.map((item) => item.rating));
         }
         if (res.matches.length < 5) {
           setMore(false);
@@ -70,6 +105,8 @@ const PlayerProfile = () => {
     };
     fetchMatches();
   }, [page]);
+
+  console.log("dates: ", dates);
 
   const handleClickMore = () => {
     setMatchLoading(() => true);
@@ -144,13 +181,65 @@ const PlayerProfile = () => {
     };
   }, []);
 
+  const data = {
+    labels: dates,
+    datasets: [
+      {
+        label: "Player Ratings",
+        data: scores,
+        borderColor: "#4ade80", // Tailwind's green-400
+        backgroundColor: "rgba(74, 222, 128, 0.2)", // Light green
+        pointBorderColor: "#16a34a", // Tailwind's green-600
+        // tension: 0, // Smooth curve
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: "top",
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: "Date and Time",
+        },
+        ticks: {
+          display: false, // Disable the x-axis labels
+        },
+      },
+      y: {
+        title: {
+          display: false,
+          text: "Rating",
+        },
+        min: 1100,
+        max: 2000,
+        ticks: {
+          callback: function (value) {
+            const ratings = [1200, 1400, 1600, 1800, 1900, 2000];
+            if (ratings.includes(value)) {
+              return value;
+            }
+            return "";
+          },
+        },
+      },
+    },
+  };
+
   return (
     <>
-      {profileLoading && (
+      {/* {profileLoading && (
         <div className="flex justify-center items-center col-span-full">
           <CenterSpinner width={10} />
         </div>
-      )}
+      )} */}
       {profileNotFound && (
         <div className="min-h-screen min-w-screen flex justify-center items-center text-2xl text-white font-semibold">
           No player found with this handle.{" "}
@@ -228,6 +317,9 @@ const PlayerProfile = () => {
                     src={profileAvatar}
                     alt="player-avatar"
                   />
+                </div>
+                <div className="w-full h-96 mx-auto border flex items-center justify-center">
+                  <Line data={data} options={options} />
                 </div>
                 <div className="py-2 px-4 flex justify-center items-center  gap-8 text-white text-lg ">
                   <h1>
