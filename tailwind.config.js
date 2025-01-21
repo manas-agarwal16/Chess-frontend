@@ -34,15 +34,13 @@ module.exports = {
     },
   },
   plugins: [
+    require("tailwind-scrollbar"),
     function ({ addUtilities }) {
       addUtilities({
         ".scrollbar-hidden": {
-          "&::-webkit-scrollbar": { display: "none" },
-          "-ms-overflow-style": "none",
-          "scrollbar-width": "none",
-        },
-        ".debug-outline": {
-          outline: "1px solid red",
+          "&::-webkit-scrollbar": { display: "none !important" },
+          "-ms-overflow-style": "none !important",
+          "scrollbar-width": "none !important",
         },
       });
     },

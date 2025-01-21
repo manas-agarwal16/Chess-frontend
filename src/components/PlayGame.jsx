@@ -61,7 +61,7 @@ const PlayGame = () => {
   const todoIdRef = useRef(null);
   const opponentRef = useRef({});
 
-  const [squareWidth, setSquareWidth] = useState(70); // Default square width
+  const [squareWidth, setSquareWidth] = useState(70);
   const chessboardRef = useRef(null);
   // full screen
   const requestFullscreen = () => {
@@ -118,12 +118,6 @@ const PlayGame = () => {
               roomName: roomNameRef.current,
             });
           }
-          // sessionStorage.setItem("resigned", "true");
-          // console.log(
-          //   "resigned roomName , playerId : ",
-          //   roomNameRef.current,
-          //   playerData.id
-          // );
           handleResignGame();
         }
       };
@@ -134,15 +128,15 @@ const PlayGame = () => {
     const updateSquareWidth = () => {
       if (chessboardRef.current) {
         const boardWidth = chessboardRef.current.offsetWidth;
-        setSquareWidth(boardWidth / 8); // 8 squares per row
+        setSquareWidth(boardWidth / 8);
       }
     };
 
-    updateSquareWidth(); // Initialize square width
-    window.addEventListener("resize", updateSquareWidth); // Update on window resize
+    updateSquareWidth();
+    window.addEventListener("resize", updateSquareWidth);
 
     return () => {
-      window.removeEventListener("resize", updateSquareWidth); // Cleanup event listener
+      window.removeEventListener("resize", updateSquareWidth);
     };
   }, []);
 
@@ -637,6 +631,12 @@ const PlayGame = () => {
           <div className="fixed inset-0 flex items-center justify-center z-20">
             <div className="relative w-72 h-72 bg-[#BC8F8F] rounded-lg shadow-lg flex flex-col items-center justify-center gap-4">
               {/* Close Button */}
+              <button
+                onClick={handleCleanUp}
+                className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+              >
+                &times;
+              </button>
               {/* Modal Content */}
               <p className="text-slate-600 font-semibold text-center">
                 Ask Your Friend To Enter The Code:{" "}
@@ -644,12 +644,12 @@ const PlayGame = () => {
               <p className="text-gray-700 bg-gray-300 w-32 rounded text-center">
                 {code}
               </p>
-              <Link
+              {/* <Link
                 onClick={handleCleanUp}
                 className="text-gray-700 text-sm underline"
               >
                 Home
-              </Link>
+              </Link> */}
             </div>
           </div>
         </>
@@ -663,6 +663,12 @@ const PlayGame = () => {
           <div className="fixed inset-0 flex items-center justify-center z-20">
             <div className="relative w-72 h-72 bg-[#a9b096] rounded-lg shadow-lg flex flex-col items-center justify-center">
               {/* Enter code form */}
+              <button
+                onClick={() => navigate("/")}
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+              >
+                &times;
+              </button>
               <form onSubmit={handleSubmit(handleEnteredCode)}>
                 <div className="mb-3">
                   <label
@@ -691,12 +697,12 @@ const PlayGame = () => {
                   bgColor="bg-[#a9b096] text-gray-"
                   className="w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm bg-[#e9f8c178] text-slate-600"
                 />
-                <Link
+                {/* <Link
                   to={"/"}
                   className="text-gray-700 block text-center pt-3 text-sm underline"
                 >
                   Home
-                </Link>
+                </Link> */}
               </form>
             </div>
           </div>
