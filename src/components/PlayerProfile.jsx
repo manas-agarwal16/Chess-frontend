@@ -270,10 +270,10 @@ const PlayerProfile = () => {
             return ratings.includes(value) ? value : ""; // Only display specific ratings
           },
         },
-        // grid: {
-        //   color: "#525252", // Tailwind's gray-600 for subtle grid lines
-        //   borderDash: [0, 0], // Dashed lines for better aesthetics
-        // },
+        grid: {
+          color: "#525252", // Tailwind's gray-600 for subtle grid lines
+          borderDash: [4, 4], // Dashed lines for better aesthetics
+        },
       },
     },
   };
@@ -435,11 +435,11 @@ const PlayerProfile = () => {
 
                   <div className="w-full py-6 px-4 flex mb-4 lg:flex-row justify-center items-center gap-4 bg-gray-800 md:gap-6 lg:gap-8 xl:gap-10 rounded-lg shadow-lg">
                     <div className="text-center w-full lg:w-auto">
-                      <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-medium text-gray-300">
+                      <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-medium text-gray-300 italic">
                         <span className="text-[#DAA520] font-bold not-italic">
                           Handle:
                         </span>{" "}
-                        {profileHandle?.toUpperCase()}
+                        {profileHandle?.toLowerCase()}
                       </h2>
                     </div>
                     <div className="text-center w-full lg:w-auto">
