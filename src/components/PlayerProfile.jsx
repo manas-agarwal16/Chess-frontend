@@ -107,7 +107,7 @@ const PlayerProfile = () => {
         setProfileNotFound(() => true);
         setTimeout(() => {
           navigate("/");
-        }, 1500);
+        }, 2000);
       }
     };
     fetchMatches();
@@ -332,7 +332,7 @@ const PlayerProfile = () => {
         <Heading />
       </div>
       {profileNotFound && (
-        <div className="min-h-screen min-w-screen flex justify-center items-center text-2xl text-white font-semibold">
+        <div className="min-h-screen min-w-screen flex justify-center items-center text-2xl text-white text-center p-4 font-semibold">
           No player found with this handle.{" "}
         </div>
       )}
@@ -393,15 +393,7 @@ const PlayerProfile = () => {
               </div>
             )}
 
-            <div className="min-h-screen w-full text-gray-200">
-              {/* <div
-                onClick={() => navigate("/")}
-                className="absolute cursor-pointer pt-2 px-2 text-center"
-              >
-                <Heading className="text-3xl text-[#A0522D] pt-0 font-semibold my-0 inline-block" />
-              </div> */}
-
-              {/* <div className="flex items-center justify-center"> */}
+            <div className="min-h-screen flex flex-col w-full mb-2 text-gray-200">
               <div className="flex flex-col justify-between px-4">
                 <div className="flex flex-col items-center justify-between">
                   <div className="py-4 w-full flex justify-center md:justify-center gap-2 items-center">
@@ -486,8 +478,8 @@ const PlayerProfile = () => {
 
                 {/* <div className="w-40"></div> */}
               </div>
-              <div className="flex flex-col items-center justify-center px-4">
-                <div className="w-full px-4 py-4 bg-gray-800 rounded-lg shadow-lg">
+              <div className="flex-1 flex-col h-full items-center justify-center px-4">
+                <div className="w-full h-full px-4 py-4 bg-gray-800 rounded-lg shadow-lg">
                   <h1 className="text-2xl font-semibold text-blue-600">
                     MATCHES:{" "}
                   </h1>
@@ -630,7 +622,6 @@ const PlayerProfile = () => {
                   )}
                 </div>
               </div>
-              {/* </div> */}
             </div>
           </>
         )}
