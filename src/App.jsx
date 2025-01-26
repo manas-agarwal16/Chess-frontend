@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import "./App.css";
 import { Outlet, useNavigate } from "react-router-dom";
-import { Button } from "./components";
+import { Button, LoadingBars } from "./components";
 import { Chessboard } from "react-chessboard";
 import { useDispatch } from "react-redux";
 import {
@@ -84,6 +84,7 @@ const App = () => {
     // <div className="bg-gray-800 min-h-screen border-blue-500 selection:bg-[#a45633]">
     <>
       <Outlet />
+      {/* <LoadingBars /> */}
       {/* <div className="w-full h-full flex-col justify-center items-center">
         <Button
           bgColor="bg-gray-950"

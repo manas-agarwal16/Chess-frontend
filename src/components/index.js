@@ -9,9 +9,11 @@ import Heading from "./Heading";
 import PlayGame from "./PlayGame.jsx";
 import PlayerProfile from "./PlayerProfile.jsx";
 import Spinner from "./Spinner.jsx";
+import LoadingBars from "./LoadingBars.jsx";
 
 export {
   Home,
+  LoadingBars,
   Button,
   Input,
   Login,

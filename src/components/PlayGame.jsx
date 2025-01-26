@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 import { set, useForm } from "react-hook-form";
-import { CenterSpinner, Input, Button } from "./index.js";
+import { CenterSpinner, Input, Button, LoadingBars } from "./index.js";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import { updatePlayerRating } from "../store/features/gameSlice.js";
@@ -54,6 +54,7 @@ const PlayGame = () => {
   const [resignGameMsg, setResignGameMsg] = useState(false);
   const [opponentResigned, setOpponentResigned] = useState(false);
   const [todoId, setTodoId] = useState(null); //konsa player task krega
+  const [calculation, setCalculation] = useState(false);
 
   const roomNameRef = useRef(null);
   const checkmateRef = useRef(null);
@@ -172,7 +173,8 @@ const PlayGame = () => {
     console.log("checkmate : ", game.isCheckmate());
     if (game.isCheckmate()) {
       setTimeout(() => {
-        setGameLoading(() => true);
+        // setGameLoading(() => true);
+        setCalculation(() => true);
       }, 1000);
       let winnerId, losserId;
       if (game._turn === color[0]) {
@@ -203,9 +205,12 @@ const PlayGame = () => {
       game.isInsufficientMaterial()
     ) {
       setTimeout(() => {
-        setGameLoading(() => true);
+        // setGameLoading(() => true);
+        setCalculation(() => true);
         setStatus(() => "Draw");
-        socket.emit("draw", { roomName });
+        if (you.id === todoId) {
+          socket.emit("draw", { roomName });
+        }
       }, 500);
     }
   }, [game]);
@@ -393,7 +398,8 @@ const PlayGame = () => {
 
       console.log("disconnected");
       socket.emit("gameOverClearWaitings", you.id);
-      setGameLoading(() => false);
+      // setGameLoading(() => false);
+      setCalculation(() => false);
       socket.disconnect();
     }
   );
@@ -426,7 +432,8 @@ const PlayGame = () => {
       drawRef.current = true;
 
       socket.emit("gameOverClearWaitings", you.id);
-      setGameLoading(() => false);
+      // setGameLoading(() => false);
+      setCalculation(() => false);
       socket.disconnect();
     }
   );
@@ -434,7 +441,6 @@ const PlayGame = () => {
   //backend
   socket.on("resignedGame", ({ roomName, playerId }) => {
     console.log("resignedGame : ", roomName, playerId);
-
     if (you.id != (undefined || null) && opponent.id != (undefined || null)) {
       console.log("you.id : ", you.id);
       if (you.id === playerId) {
@@ -443,7 +449,7 @@ const PlayGame = () => {
         console.log("opponent resigned the game");
         setOpponentResigned(() => true);
       }
-      setGameLoading(() => true);
+      setCalculation(() => true);
       setTimeout(() => {
         setOpponentResigned(() => false);
         setStatus(() => (you.id === playerId ? "Lost" : "Won"));
@@ -558,7 +564,12 @@ const PlayGame = () => {
   return (
     <>
       {gameLoading && !opponentResigned && <CenterSpinner />}
-      {(checkmate || draw) && (
+      {calculation && (
+        <>
+          <LoadingBars />
+        </>
+      )}
+      {(checkmate || draw) && !calculation && (
         <>
           <div className="h-screen bg- w-full  flex items-center justify-center">
             {/* Player Info Section */}
@@ -708,7 +719,7 @@ const PlayGame = () => {
           </div>
         </>
       )}
-      {!checkmate && !draw && (
+      {!calculation && !checkmate && !draw && (
         <div className="h-screen min-w-screen flex flex-col items-center justify-center">
           {loading && <CenterSpinner />}
           {mode === "online" && !opponent.handle && (
@@ -778,7 +789,7 @@ const PlayGame = () => {
               </div>
             </>
           )}
-          {!loading && !gameLoading && opponent.handle && (
+          {!loading && !calculation && opponent.handle && (
             <div className="w-full h-full flex-col justify-center items-center">
               <Button
                 bgColor="bg-gray-950"
