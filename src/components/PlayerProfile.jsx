@@ -388,7 +388,7 @@ const PlayerProfile = () => {
                       />
                     </div>
                   ))}
-                  <div className="h-10 text-center mx-auto border bg-gray-800 w-72 md:w-80 lg:w-96 xl:w-1/2"></div>
+                  <div className="text-center mx-auto border bg-gray-800 w-72 md:w-80 lg:w-96 xl:w-1/2"></div>
                 </div>
               </div>
             )}
@@ -411,7 +411,7 @@ const PlayerProfile = () => {
                           />
                         </div>
                       )}
-                      <div className="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-full overflow-hidden bg-gray-900">
+                      <div className="w-48 h-48 md:w-56 md:h-56 lg:w-72 lg:h-72 rounded-full shawow-lg overflow-hidden bg-gray-900">
                         <img
                           className="w-full h-full object-cover object-center"
                           src={profileAvatar}

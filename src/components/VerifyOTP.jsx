@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { login, resendOTP, verifyOTP } from "../store/features/authSlice";
 import { useForm } from "react-hook-form";
 import { Button, Input, CenterSpinner, Heading } from "./index";
-import chessImage from "../assets/chess-image.jpg";
+import chessImage from "../assets/chessmasterHomeImage.jpg";
 
 const VerifyOTP = () => {
   const { loading } = useSelector((state) => state.auth);
@@ -45,9 +45,8 @@ const VerifyOTP = () => {
     <div className="flex min-h-screen w-screen">
       <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-screen min-h-[50vh] w-full p-0 items-center justify-center hidden">
         <img
-          className="w-full h-full shadow-lg"
+          className="w-full h-[50vh] lg:h-full object-cover shadow-2xl object-center"
           src={chessImage}
-          alt="chess-image"
         />
       </section>
       <section className="w-full min-h-screen flex flex-col px-6 items-center justify-between">
@@ -84,7 +83,7 @@ const VerifyOTP = () => {
               <div className="mb-5">
                 <p className="text-white">
                   <div
-                    className="text-gray-300 underline hover:text-gray-800"
+                    className="text-gray-300 cursor-pointer underline hover:text-gray-400"
                     onClick={handleResendOTP}
                   >
                     Resend OTP

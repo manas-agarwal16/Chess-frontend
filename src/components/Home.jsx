@@ -117,7 +117,7 @@ const Home = () => {
         {/* Left Section */}
         <section className="lg:flex lg:flex-row lg:min-h-screen lg:w-3/4 min-h-[50vh] p-0 items-center justify-center hidden">
           <img
-            className="filter brightness-90 w-full h-[50vh] lg:h-full object-cover shadow-2xl object-center"
+            className="w-full h-[50vh] lg:h-full object-cover shadow-2xl object-center"
             src={chessImage2}
             alt="chess-image"
           />
