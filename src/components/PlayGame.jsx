@@ -16,14 +16,14 @@ import { Chess } from "chess.js";
 import { updatePlayerRating } from "../store/features/gameSlice.js";
 
 const PlayGame = () => {
-  const config = {
-    iceServers: [
-      {
-        urls: "stun:stun.l.google.com:19302",
-        // "stun:global.stun.twilio.com:3478",
-      }, // Free STUN server
-    ],
-  };
+  // const config = {
+  //   iceServers: [
+  //     {
+  //       urls: "stun:stun.l.google.com:19302",
+  //       // "stun:global.stun.twilio.com:3478",
+  //     }, // Free STUN server
+  //   ],
+  // };
   const socket = useMemo(
     () =>
       io(import.meta.env.VITE_BACKEND_URL, {
@@ -33,7 +33,7 @@ const PlayGame = () => {
     []
   );
 
-  let peer;
+  // let peer;
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -82,10 +82,10 @@ const PlayGame = () => {
   const [squareWidth, setSquareWidth] = useState(70);
   const chessboardRef = useRef(null);
 
-  if (roomName) {
-    console.log("creating peer connection");
-    peer = useMemo(() => new RTCPeerConnection(config), []);
-  }
+  // if (roomName) {
+  //   console.log("creating peer connection");
+  //   peer = useMemo(() => new RTCPeerConnection(config), []);
+  // }
 
   //webRTC
   // let localStream, peerConnection;
@@ -296,7 +296,7 @@ const PlayGame = () => {
   }, []);
 
   socket.on("userDisconnectedSuccessfully", (playerId) => {
-    console.log("17-01-2025 playerId: ", playerId);
+    // console.log("17-01-2025 playerId: ", playerId);
     if (checkmate || draw) {
       socket.disconnect();
     } else {
@@ -390,19 +390,19 @@ const PlayGame = () => {
     setGameLoading(() => false);
 
     // if (roomName) {
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then((stream) => {
-        localStream = stream;
-        console.log("Local stream initialized:", localStream);
-      })
-      .catch((error) => {
-        console.error("Error accessing media devices:", error);
-      });
+    // navigator.mediaDevices
+    //   .getUserMedia({ audio: true })
+    //   .then((stream) => {
+    //     localStream = stream;
+    //     console.log("Local stream initialized:", localStream);
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error accessing media devices:", error);
+    //   });
 
-    console.log("calling createOffer");
+    // console.log("calling createOffer");
 
-    await createOffer();
+    // await createOffer();
     // }
   });
 
@@ -604,36 +604,36 @@ const PlayGame = () => {
   };
 
   //getting user audio
-  socket.on("offer", async (offer) => {
-    console.log("offer : ", offer);
-    peerConnection = createPeerConnection();
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-    const answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer);
-    socket.emit("answer", { answer, roomName: roomNameRef.current });
-  });
+  // socket.on("offer", async (offer) => {
+  //   console.log("offer : ", offer);
+  //   peerConnection = createPeerConnection();
+  //   await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+  //   const answer = await peerConnection.createAnswer();
+  //   await peerConnection.setLocalDescription(answer);
+  //   socket.emit("answer", { answer, roomName: roomNameRef.current });
+  // });
 
   // Handle answer
-  socket.on("answer", (answer) => {
-    console.log("answer : ", answer);
-    peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-  });
+  // socket.on("answer", (answer) => {
+  //   console.log("answer : ", answer);
+  //   peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+  // });
 
   // Handle ICE candidates
-  socket.on("ice-candidate", (candidate) => {
-    console.log("ice-candidate:", candidate);
+  // socket.on("ice-candidate", (candidate) => {
+  //   console.log("ice-candidate:", candidate);
 
-    // Ensure the candidate has sdpMid and sdpMLineIndex
-    if (candidate.sdpMid && candidate.sdpMLineIndex != null) {
-      const iceCandidate = new RTCIceCandidate(candidate);
-      peerConnection
-        .addIceCandidate(iceCandidate)
-        .then(() => console.log("ICE Candidate added"))
-        .catch((error) => console.error("Error adding ICE Candidate:", error));
-    } else {
-      console.error("Invalid ICE candidate received", candidate);
-    }
-  });
+  //   // Ensure the candidate has sdpMid and sdpMLineIndex
+  //   if (candidate.sdpMid && candidate.sdpMLineIndex != null) {
+  //     const iceCandidate = new RTCIceCandidate(candidate);
+  //     peerConnection
+  //       .addIceCandidate(iceCandidate)
+  //       .then(() => console.log("ICE Candidate added"))
+  //       .catch((error) => console.error("Error adding ICE Candidate:", error));
+  //   } else {
+  //     console.error("Invalid ICE candidate received", candidate);
+  //   }
+  // });
 
   // const createPeerConnection = useCallback((data) => {
   //   // const pc = new RTCPeerConnection(config);
@@ -668,20 +668,20 @@ const PlayGame = () => {
   //   return pc;
   // }, []);
 
-  const createOffer = useCallback(async (data) => {
-    console.log("in createOffer roomName: ", roomNameRef.current);
+  // const createOffer = useCallback(async (data) => {
+  //   console.log("in createOffer roomName: ", roomNameRef.current);
 
-    // peerConnection = createPeerConnection();
-    // const offer = await peerConnection.createOffer();
-    // await peerConnection.setLocalDescription(offer);
+  //   // peerConnection = createPeerConnection();
+  //   // const offer = await peerConnection.createOffer();
+  //   // await peerConnection.setLocalDescription(offer);
 
-    const offer = peer.createOffer();
-    await peer.setLocalDescription(offer);
+  //   const offer = peer.createOffer();
+  //   await peer.setLocalDescription(offer);
 
-    console.log("offer created: ", offer);
+  //   console.log("offer created: ", offer);
 
-    socket.emit("offer", { offer, roomName: roomNameRef.current });
-  }, []);
+  //   socket.emit("offer", { offer, roomName: roomNameRef.current });
+  // }, []);
 
   return (
     <>
