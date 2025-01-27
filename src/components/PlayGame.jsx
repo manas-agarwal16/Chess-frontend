@@ -1,15 +1,29 @@
-import React, { useEffect, useState, useMemo, useRef, forwardRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+  forwardRef,
+  useCallback,
+} from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { data, Link, useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 import { set, useForm } from "react-hook-form";
 import { CenterSpinner, Input, Button, LoadingBars } from "./index.js";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import { updatePlayerRating } from "../store/features/gameSlice.js";
-import { use } from "react";
 
 const PlayGame = () => {
+  const config = {
+    iceServers: [
+      {
+        urls: "stun:stun.l.google.com:19302",
+        // "stun:global.stun.twilio.com:3478",
+      }, // Free STUN server
+    ],
+  };
   const socket = useMemo(
     () =>
       io(import.meta.env.VITE_BACKEND_URL, {
@@ -18,6 +32,9 @@ const PlayGame = () => {
       }),
     []
   );
+
+  let peer;
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { mode } = useParams();
@@ -64,6 +81,15 @@ const PlayGame = () => {
 
   const [squareWidth, setSquareWidth] = useState(70);
   const chessboardRef = useRef(null);
+
+  if (roomName) {
+    console.log("creating peer connection");
+    peer = useMemo(() => new RTCPeerConnection(config), []);
+  }
+
+  //webRTC
+  // let localStream, peerConnection;
+
   // full screen
   const requestFullscreen = () => {
     const doc = document.documentElement;
@@ -362,6 +388,22 @@ const PlayGame = () => {
     opponentRef.current =
       players.player1.id === playerData.id ? players.player2 : players.player1;
     setGameLoading(() => false);
+
+    // if (roomName) {
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        localStream = stream;
+        console.log("Local stream initialized:", localStream);
+      })
+      .catch((error) => {
+        console.error("Error accessing media devices:", error);
+      });
+
+    console.log("calling createOffer");
+
+    await createOffer();
+    // }
   });
 
   //backend makeMove
@@ -546,7 +588,7 @@ const PlayGame = () => {
   };
 
   //working handleResignGame
-  const handleResignGame = () => {
+  const handleResignGame = useCallback(() => {
     console.log("resigning the game");
 
     setResignGameMsg(() => false);
@@ -554,12 +596,92 @@ const PlayGame = () => {
       roomName: roomNameRef.current,
       playerId: playerData.id,
     });
-  };
+  }, []);
 
   const handleCleanUp = () => {
     socket.emit("userDisconnected", { playerId: playerData.id, roomName });
     navigate("/");
   };
+
+  //getting user audio
+  socket.on("offer", async (offer) => {
+    console.log("offer : ", offer);
+    peerConnection = createPeerConnection();
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    socket.emit("answer", { answer, roomName: roomNameRef.current });
+  });
+
+  // Handle answer
+  socket.on("answer", (answer) => {
+    console.log("answer : ", answer);
+    peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+  });
+
+  // Handle ICE candidates
+  socket.on("ice-candidate", (candidate) => {
+    console.log("ice-candidate:", candidate);
+
+    // Ensure the candidate has sdpMid and sdpMLineIndex
+    if (candidate.sdpMid && candidate.sdpMLineIndex != null) {
+      const iceCandidate = new RTCIceCandidate(candidate);
+      peerConnection
+        .addIceCandidate(iceCandidate)
+        .then(() => console.log("ICE Candidate added"))
+        .catch((error) => console.error("Error adding ICE Candidate:", error));
+    } else {
+      console.error("Invalid ICE candidate received", candidate);
+    }
+  });
+
+  // const createPeerConnection = useCallback((data) => {
+  //   // const pc = new RTCPeerConnection(config);
+  //   const pc = useMemo(() => new RTCPeerConnection(config), []);
+
+  //   // Add local audio track
+  //   // if (localStream && localStream.getTracks()) {
+  //   //   localStream
+  //   //     .getTracks()
+  //   //     .forEach((track) => pc.addTrack(track, localStream));
+  //   // } else {
+  //   //   console.error("Local stream is invalid or empty.");
+  //   // }
+
+  //   // // Handle remote stream
+  //   // pc.ontrack = (event) => {
+  //   //   const audio = new Audio();
+  //   //   audio.srcObject = event.streams[0];
+  //   //   audio.play();
+  //   // };
+
+  //   // // Handle ICE candidates
+  //   // pc.onicecandidate = (event) => {
+  //   //   if (event.candidate) {
+  //   //     socket.emit("ice-candidate", {
+  //   //       candidate: event.candidate,
+  //   //       roomName: roomNameRef.current,
+  //   //     });
+  //   //   }
+  //   // };
+
+  //   return pc;
+  // }, []);
+
+  const createOffer = useCallback(async (data) => {
+    console.log("in createOffer roomName: ", roomNameRef.current);
+
+    // peerConnection = createPeerConnection();
+    // const offer = await peerConnection.createOffer();
+    // await peerConnection.setLocalDescription(offer);
+
+    const offer = peer.createOffer();
+    await peer.setLocalDescription(offer);
+
+    console.log("offer created: ", offer);
+
+    socket.emit("offer", { offer, roomName: roomNameRef.current });
+  }, []);
 
   return (
     <>
