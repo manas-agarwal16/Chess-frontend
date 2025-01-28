@@ -124,7 +124,7 @@ const PlayGame = () => {
       socket.connect();
       //when user goes back <-
       return () => {
-        // console.log("cleanup from login useEffect");
+        console.log("cleanup from login useEffect");
         // console.log("roomName: ", roomNameRef.current);
         // console.log("todoId: ", todoIdRef.current);
         // console.log("opponentId: ", opponentRef.current.Id);
@@ -134,7 +134,11 @@ const PlayGame = () => {
           console.log("playerData.id: ", playerData.id);
 
           socket.emit("gameOverClearWaitings", playerData.id);
-          socket.disconnect();
+          console.log("disconnecting");
+
+          setTimeout(() => {
+            socket.disconnect();
+          }, 1000);
           return;
         }
 
@@ -604,7 +608,9 @@ const PlayGame = () => {
 
   const handleCleanUp = () => {
     socket.emit("userDisconnected", { playerId: playerData.id, roomName });
-    navigate("/");
+    setTimeout(() => {
+      navigate("/");
+    }, 400);
   };
 
   //getting user audio
