@@ -1,3 +1,5 @@
+//Errors: no opponent resign msg, direct calculating ratings, need to use setTimeOut i guess.
+
 import React, {
   useEffect,
   useState,
@@ -7,7 +9,7 @@ import React, {
   useCallback,
 } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { data, Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 import { set, useForm } from "react-hook-form";
 import { CenterSpinner, Input, Button, LoadingBars } from "./index.js";
@@ -495,12 +497,13 @@ const PlayGame = () => {
       console.log("you.id : ", you.id);
       if (you.id === playerId) {
         console.log("you resigned the game");
+        setCalculation(() => true);
       } else {
         console.log("opponent resigned the game");
         setOpponentResigned(() => true);
       }
-      setCalculation(() => true);
       setTimeout(() => {
+        setCalculation(() => true);
         setOpponentResigned(() => false);
         setStatus(() => (you.id === playerId ? "Lost" : "Won"));
 
