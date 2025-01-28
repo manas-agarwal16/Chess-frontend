@@ -1,12 +1,24 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
     <title>Chess Master</title>
+    <style>
+      ::selection {
+        background-color: #A0522D;
+        color: #fff;
+      }
+    </style>
   </head>
-  <body style="touch-action: manipulation; box-sizing: border-box;" class="bg-gray-900 text-white has-scrollbar">
+  <body
+    style="touch-action: manipulation; box-sizing: border-box"
+    class="bg-gray-900 text-white has-scrollbar"
+  >
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
