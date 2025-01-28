@@ -220,10 +220,12 @@ const PlayGame = () => {
         "losserId : ",
         losserId
       );
-      if (you.id === todoId) {
-        console.log("checkmate from up here");
-        socket.emit("checkmate", { roomName, winnerId, losserId });
-      }
+      setTimeout(() => {
+        if (you.id === todoId) {
+          console.log("checkmate from up here");
+          socket.emit("checkmate", { roomName, winnerId, losserId });
+        }
+      }, 2000);
     }
     if (
       game.isStalemate() ||
@@ -233,11 +235,13 @@ const PlayGame = () => {
       setTimeout(() => {
         // setGameLoading(() => true);
         setCalculation(() => true);
-        setStatus(() => "Draw");
+      }, 1000);
+      setStatus(() => "Draw");
+      setTimeout(() => {
         if (you.id === todoId) {
           socket.emit("draw", { roomName });
         }
-      }, 500);
+      }, 2000);
     }
   }, [game]);
 
