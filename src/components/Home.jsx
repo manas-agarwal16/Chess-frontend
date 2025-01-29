@@ -21,6 +21,15 @@ const Home = () => {
 
   // Close search bar when clicking outside
   useEffect(() => {
+
+    // const startMyAudio = async () => {
+    //   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    //   console.log({ stream });
+    //   console.log(stream);
+    // }
+
+    // startMyAudio();
+
     const handleOutsideClick = (e) => {
       if (searchBarRef.current && !searchBarRef.current.contains(e.target)) {
         setShowSearch(false);

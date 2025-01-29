@@ -18,14 +18,6 @@ import { Chess } from "chess.js";
 import { updatePlayerRating } from "../store/features/gameSlice.js";
 
 const PlayGame = () => {
-  // const config = {
-  //   iceServers: [
-  //     {
-  //       urls: "stun:stun.l.google.com:19302",
-  //       // "stun:global.stun.twilio.com:3478",
-  //     }, // Free STUN server
-  //   ],
-  // };
   const socket = useMemo(
     () =>
       io(import.meta.env.VITE_BACKEND_URL, {
@@ -84,14 +76,6 @@ const PlayGame = () => {
   const [squareWidth, setSquareWidth] = useState(70);
   const chessboardRef = useRef(null);
 
-  // if (roomName) {
-  //   console.log("creating peer connection");
-  //   peer = useMemo(() => new RTCPeerConnection(config), []);
-  // }
-
-  //webRTC
-  // let localStream, peerConnection;
-
   // full screen
   const requestFullscreen = () => {
     const doc = document.documentElement;
@@ -127,10 +111,6 @@ const PlayGame = () => {
       //when user goes back <-
       return () => {
         console.log("cleanup from login useEffect");
-        // console.log("roomName: ", roomNameRef.current);
-        // console.log("todoId: ", todoIdRef.current);
-        // console.log("opponentId: ", opponentRef.current.Id);
-
         sessionStorage.setItem("resigned", "true");
         if (!roomNameRef.current) {
           console.log("playerData.id: ", playerData.id);
@@ -371,13 +351,188 @@ const PlayGame = () => {
     console.log("Waiting for a player to join: ", roomName);
   });
 
+  let localStream;
+  // const [localStream, setLocalStream] = useState(null);
   //start the game
   socket.on("startTheGame", async (players) => {
-    console.log("roomName : ", players.roomName);
-    // console.log("player1 : ", players.player1);
-    // console.log("player2 : ", players.player2);
+    //audio access
+    (async () => {
+      try {
+        console.log("startMyAudio called");
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        localStream = stream;
+        // setLocalStream(() => stream);
+        console.log({ stream });
+      } catch (error) {
+        console.log("error in startMyAudio: ", error);
+      }
+    })();
 
-    console.log("todoId: ", players.todoId);
+    let PeerConnection;
+    setTimeout(async () => {
+      PeerConnection = (() => {
+        // if (!localStream) return;
+        console.log("PeerConnection called");
+
+        let peerConnection;
+
+        const createPeerConnection = () => {
+          const config = {
+            iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+          };
+          peerConnection = new RTCPeerConnection(config);
+
+          console.log("peer to peer connection localStream: ", localStream);
+
+          //add localStream to peer connection
+          if (localStream) {
+            console.log("Adding tracks to peer connection...");
+            localStream.getTracks().forEach((track) => {
+              peerConnection.addTrack(track, localStream);
+            });
+          } else {
+            console.log("localStream is not available yet");
+          }
+
+          //listen to ice candidate
+          peerConnection.onicecandidate = async function (event) {
+            console.log("got ice-candidate of the user");
+            if (event.candidate) {
+              socket.emit("ice-candidate", {
+                roomName: roomNameRef.current,
+                candidate: event.candidate,
+              });
+            }
+          };
+          return peerConnection;
+        };
+
+        return {
+          getInstance: () => {
+            if (!peerConnection) {
+              peerConnection = createPeerConnection();
+            }
+            return peerConnection;
+          },
+        };
+      })();
+
+      const createOffer = async () => {
+        if (!PeerConnection) return;
+        const pc = await PeerConnection?.getInstance();
+        console.log("in create offer pc: ", pc);
+        const offer = await pc.createOffer();
+        console.log({ offer });
+        await pc.setLocalDescription(offer);
+        socket.emit("offer", {
+          offer: pc.localDescription,
+          roomName: roomNameRef.current,
+        });
+      };
+
+      await createOffer();
+    }, 800);
+
+    // Receive offer
+    socket.on("offer", async ({ offer }) => {
+      if (!PeerConnection) return;
+      console.log("Received offer", offer);
+
+      const pc = await PeerConnection.getInstance();
+      console.log("PeerConnection instance:", pc);
+
+      // Ensure we are in the correct state to handle the offer
+      if (pc.signalingState !== "stable") {
+        console.log(
+          "PeerConnection signaling state is not stable, waiting for stable state..."
+        );
+        return;
+      }
+
+      try {
+        // Set the remote description as the offer
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        console.log("Remote description set successfully");
+
+        // Create and send the answer
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        console.log("Answer created and local description set");
+
+        socket.emit("answer", {
+          roomName: roomNameRef.current,
+          answer: pc.localDescription,
+        });
+      } catch (error) {
+        console.error("Error while handling offer", error);
+      }
+    });
+
+    // Receive answer
+    socket.on("answer", async ({ roomName, answer }) => {
+      if (!PeerConnection) return;
+      console.log("Received answer for room", roomName);
+
+      const pc = await PeerConnection.getInstance();
+      console.log("PeerConnection instance:", pc);
+
+      // Ensure we are in the correct state to handle the answer
+      if (pc.signalingState !== "have-remote-offer") {
+        console.log(
+          "PeerConnection signaling state is not 'have-remote-offer', waiting for offer..."
+        );
+        return;
+      }
+
+      try {
+        // Set the remote description as the answer
+        await pc.setRemoteDescription(new RTCSessionDescription(answer));
+        console.log("Remote description set successfully for answer");
+      } catch (error) {
+        console.error("Error while handling answer", error);
+      }
+    });
+
+    //receive offer
+    // socket.on("offer", async ({ offer }) => {
+    //   console.log("in offer PeerConnection: ", PeerConnection);
+
+    //   console.log({ offer });
+
+    //   const pc = await PeerConnection.getInstance();
+    //   console.log({ pc });
+    //   //set remoteDescription to peerConnection
+    //   await pc.setRemoteDescription(offer);
+
+    //   //create answer
+    //   const answer = await pc.createAnswer();
+    //   await pc.setLocalDescription(answer);
+
+    //   console.log({ answer });
+
+    //   socket.emit("answer", {
+    //     roomName: roomNameRef.current,
+    //     answer: pc.localDescription,
+    //   });
+    // });
+
+    // //receive answer
+    // socket.on("answer", async ({ roomName, answer }) => {
+    //   console.log({ roomName, answer });
+
+    //   const pc = await PeerConnection.getInstance();
+    //   await pc.setRemoteDescription(answer);
+    // });
+
+    //ice-candidate
+    socket.on("ice-candidate", async ({ candidate }) => {
+      if (!PeerConnection) return;
+      console.log("ice-candidate: ", candidate);
+      const pc = PeerConnection.getInstance();
+      await pc.addIceCandidate(new RTCIceCandidate(candidate));
+    });
 
     todoIdRef.current = players.todoId;
     setTodoId(players.todoId);
@@ -398,23 +553,45 @@ const PlayGame = () => {
     opponentRef.current =
       players.player1.id === playerData.id ? players.player2 : players.player1;
     setGameLoading(() => false);
-
-    // if (roomName) {
-    // navigator.mediaDevices
-    //   .getUserMedia({ audio: true })
-    //   .then((stream) => {
-    //     localStream = stream;
-    //     console.log("Local stream initialized:", localStream);
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error accessing media devices:", error);
-    //   });
-
-    // console.log("calling createOffer");
-
-    // await createOffer();
-    // }
   });
+
+  // //receive offer
+  // socket.on("offer", async ({ offer }) => {
+  //   console.log("in offer PeerConnection: ", PeerConnection);
+
+  //   console.log({ offer });
+
+  //   const pc = await PeerConnection.getInstance();
+  //   console.log({ pc });
+  //   //set remoteDescription to peerConnection
+  //   await pc.setRemoteDescription(offer);
+
+  //   //create answer
+  //   const answer = await pc.createAnswer();
+  //   await pc.setLocalDescription(answer);
+
+  //   console.log({ answer });
+
+  //   socket.emit("answer", {
+  //     roomName: roomNameRef.current,
+  //     answer: pc.localDescription,
+  //   });
+  // });
+
+  // //receive answer
+  // socket.on("answer", async ({ roomName, answer }) => {
+  //   console.log({ roomName, answer });
+
+  //   const pc = await PeerConnection.getInstance();
+  //   await pc.setRemoteDescription(answer);
+  // });
+
+  // //ice-candidate
+  // socket.on("ice-candidate", async ({ candidate }) => {
+  //   console.log("ice-candidate: ", candidate);
+  //   const pc = PeerConnection.getInstance();
+  //   await pc.addIceCandidate(new RTCIceCandidate(candidate));
+  // });
 
   //backend makeMove
   socket.on("makeMove", (newPosition) => {
