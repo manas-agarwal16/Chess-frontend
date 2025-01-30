@@ -4,6 +4,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { Button, LoadingBars } from "./components";
 import { Chessboard } from "react-chessboard";
 import { useDispatch } from "react-redux";
+// import ReactPlayer from "react-player";
 import {
   getCurrentPlayer,
   refreshAccessToken,
@@ -12,7 +13,6 @@ import {
 const App = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [squareWidth, setSquareWidth] = useState(70); // Default square width
   const chessboardRef = useRef(null);
 
   useEffect(() => {
@@ -31,41 +31,6 @@ const App = () => {
     };
   }, []);
 
-  const customPieces = useMemo(() => {
-    const pieces = [
-      "wP",
-      "wN",
-      "wB",
-      "wR",
-      "wQ",
-      "wK",
-      "bP",
-      "bN",
-      "bB",
-      "bR",
-      "bQ",
-      "bK",
-    ];
-    const pieceComponents = {};
-
-    pieces.forEach((piece) => {
-      pieceComponents[piece] = ({ squareWidth = 70 }) => (
-        <div
-          style={{
-            width: squareWidth, // Dynamically sized based on square width
-            height: squareWidth, // Keep it square
-            backgroundImage: `url(/assets/${piece}.svg)`,
-            backgroundSize: "contain", // Ensure it fits within the square
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-          }}
-        />
-      );
-    });
-
-    return pieceComponents;
-  }, []);
-
   useEffect(() => {
     (async () => {
       const res = await dispatch(getCurrentPlayer());
@@ -80,10 +45,19 @@ const App = () => {
       }
     })();
   }, [dispatch]);
+
+  const [selfMute, setSelfMute] = useState(false);
+  const [oppMute, setOppMute] = useState(false);
   return (
     // <div className="bg-gray-800 min-h-screen border-blue-500 selection:bg-[#a45633]">
     <>
       <Outlet />
+      {/* <div className="bg-slate-700 w-32 m-2 rounded-lg px-4 py-2 flex justify-between items-center">
+        {!selfMute && <i className="fas fa-microphone cursor-pointer"></i>}
+        {selfMute && <i className="fas fa-microphone-slash cursor-pointer"></i>}
+        {oppMute && <i className="fas fa-volume-mute cursor-pointer"></i>}
+        {!oppMute && <i className="fas fa-volume-up cursor-pointer"></i>}
+      </div> */}
       {/* <LoadingBars /> */}
       {/* <div className="w-full h-full flex-col justify-center items-center">
         <Button
