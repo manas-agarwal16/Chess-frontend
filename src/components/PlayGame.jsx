@@ -114,7 +114,6 @@ const PlayGame = () => {
     await navigator.mediaDevices
       .getUserMedia({
         audio: true,
-        video: true,
       })
       .then((stream) => {
         setLocalStream(stream);
@@ -444,13 +443,7 @@ const PlayGame = () => {
   });
 
   useEffect(() => {
-    // (async () => {
     if (!peerConnectionRef.current) return;
-    console.log(
-      "in useEffect peerConnectionRef.current: ",
-      peerConnectionRef.current
-    );
-    console.log("todoIdRef : ", todoIdRef.current);
 
     const PeerConnection = peerConnectionRef.current;
 
@@ -470,19 +463,19 @@ const PlayGame = () => {
     // Receive offer
     socket.on("offer", async ({ offer }) => {
       if (!PeerConnection) return;
-      console.log("Received offer", offer);
+      // console.log("Received offer", offer);
 
       try {
         // Set the remote description as the offer
         await PeerConnection.setRemoteDescription(
           new RTCSessionDescription(offer)
         );
-        console.log("Remote description set successfully");
+        // console.log("Remote description set successfully");
 
         // Create and send the answer
         const answer = await PeerConnection.createAnswer();
         await PeerConnection.setLocalDescription(answer);
-        console.log("Answer created and local description set");
+        // console.log("Answer created and local description set");
 
         socket.emit("answer", {
           roomName: roomNameRef.current,
@@ -649,10 +642,10 @@ const PlayGame = () => {
       pieceComponents[piece] = ({ squareWidth = 70 }) => (
         <div
           style={{
-            width: squareWidth, // Dynamically sized based on square width
-            height: squareWidth, // Keep it square
+            width: squareWidth,
+            height: squareWidth,
             backgroundImage: `url(/assets/${piece}.svg)`,
-            backgroundSize: "contain", // Ensure it fits within the square
+            backgroundSize: "contain",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center",
           }}
@@ -661,7 +654,7 @@ const PlayGame = () => {
     });
 
     return pieceComponents;
-  }, []); // Ensure it updates only when `pieces` changes
+  }, []);
 
   //join room
   const handleEnteredCode = ({ code }) => {
@@ -726,7 +719,7 @@ const PlayGame = () => {
   const [selfMute, setSelfMute] = useState(false);
   const [oppMute, setOppMute] = useState(false);
 
-  //mute krne pe opponent ki remoteStream se audio hatao
+  //mute opponent remoteStream
   const muteAudio = async () => {
     socket.emit("muteAudio", { roomName });
     setSelfMute(true);
@@ -741,7 +734,7 @@ const PlayGame = () => {
     }
   });
 
-  //unmute krne pe opponent ki remoteStream se audio on krdo
+  //unmute opponent remoteStream
   const unmuteAudio = () => {
     console.log("unmute my audio");
     socket.emit("unmuteAudio", { roomName });
@@ -851,12 +844,6 @@ const PlayGame = () => {
               <p className="text-gray-700 bg-gray-300 w-32 rounded text-center">
                 {code}
               </p>
-              {/* <Link
-                onClick={handleCleanUp}
-                className="text-gray-700 text-sm underline"
-              >
-                Home
-              </Link> */}
             </div>
           </div>
         </>
@@ -904,12 +891,6 @@ const PlayGame = () => {
                   bgColor="bg-[#a9b096] text-gray-"
                   className="w-full py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 px-6 text-sm bg-[#e9f8c178] text-slate-600"
                 />
-                {/* <Link
-                  to={"/"}
-                  className="text-gray-700 block text-center pt-3 text-sm underline"
-                >
-                  Home
-                </Link> */}
               </form>
             </div>
           </div>
@@ -987,47 +968,6 @@ const PlayGame = () => {
           )}
           {!loading && !calculation && opponent.handle && (
             <div className="w-full h-full flex-col justify-center items-center">
-              {/* <div className="bg-slate-700 w-32 m-2 rounded-lg px-4 py-2 flex justify-between items-center">
-                <ReactPlayer
-                  playing
-                  url={localStream}
-                  muted
-                  width="0px"
-                  height="0px"
-                />
-
-                <ReactPlayer
-                  playing
-                  url={remoteStream}
-                  muted={oppMute}
-                  width="0px"
-                  height="0px"
-                />
-                {!selfMute && (
-                  <i
-                    onClick={muteAudio}
-                    className="fas fa-microphone cursor-pointer"
-                  ></i>
-                )}
-                {selfMute && (
-                  <i
-                    onClick={unmuteAudio}
-                    className="fas fa-microphone-slash cursor-pointer"
-                  ></i>
-                )}
-                {oppMute && (
-                  <i
-                    onClick={() => setOppMute(false)}
-                    className="fas fa-volume-mute cursor-pointer"
-                  ></i>
-                )}
-                {!oppMute && (
-                  <i
-                    onClick={() => setOppMute(true)}
-                    className="fas fa-volume-up cursor-pointer"
-                  ></i>
-                )}
-              </div> */}
               <Button
                 bgColor="bg-gray-950"
                 text={"Resign"}
@@ -1086,7 +1026,6 @@ const PlayGame = () => {
 
                 <div
                   ref={chessboardRef}
-                  // style={{ width: "100%", height: "100%" }}
                   className="w-full h-full max-w-[510px] mx-auto max-h-[510px] flex-col justify-center items-center"
                 >
                   <Chessboard
@@ -1106,16 +1045,15 @@ const PlayGame = () => {
                       minHeight: "200px",
                       backgroundColor: "#f0d9b5",
                     }}
-                    // customSquare={CustomSquareRenderer}
                     customDarkSquareStyle={{
                       backgroundColor: "#31363F",
-                      width: squareWidth, // Dynamically set width
-                      height: squareWidth, // Dynamically set height
+                      width: squareWidth,
+                      height: squareWidth,
                     }}
                     customLightSquareStyle={{
                       backgroundColor: "#d9d7b6",
-                      width: squareWidth, // Dynamically set width
-                      height: squareWidth, // Dynamically set height
+                      width: squareWidth,
+                      height: squareWidth,
                     }}
                     customPieces={customPieces}
                     onPieceDragBegin={(piece, sourceSquare) => {

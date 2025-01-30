@@ -16,22 +16,6 @@ const App = () => {
   const chessboardRef = useRef(null);
 
   useEffect(() => {
-    const updateSquareWidth = () => {
-      if (chessboardRef.current) {
-        const boardWidth = chessboardRef.current.offsetWidth;
-        setSquareWidth(boardWidth / 8); // 8 squares per row
-      }
-    };
-
-    updateSquareWidth(); // Initialize square width
-    window.addEventListener("resize", updateSquareWidth); // Update on window resize
-
-    return () => {
-      window.removeEventListener("resize", updateSquareWidth); // Cleanup event listener
-    };
-  }, []);
-
-  useEffect(() => {
     (async () => {
       const res = await dispatch(getCurrentPlayer());
       // console.log("res.payload here : ", res);
@@ -46,62 +30,62 @@ const App = () => {
     })();
   }, [dispatch]);
 
-  const localStream = "",
-    remoteStream = "";
+  // const localStream = "",
+  //   remoteStream = "";
 
-  const customPieces = useMemo(() => {
-    const pieces = [
-      "wP",
-      "wN",
-      "wB",
-      "wR",
-      "wQ",
-      "wK",
-      "bP",
-      "bN",
-      "bB",
-      "bR",
-      "bQ",
-      "bK",
-    ];
-    const pieceComponents = {};
+  // const customPieces = useMemo(() => {
+  //   const pieces = [
+  //     "wP",
+  //     "wN",
+  //     "wB",
+  //     "wR",
+  //     "wQ",
+  //     "wK",
+  //     "bP",
+  //     "bN",
+  //     "bB",
+  //     "bR",
+  //     "bQ",
+  //     "bK",
+  //   ];
+  //   const pieceComponents = {};
 
-    pieces.forEach((piece) => {
-      pieceComponents[piece] = ({ squareWidth = 70 }) => (
-        <div
-          style={{
-            width: squareWidth, // Dynamically sized based on square width
-            height: squareWidth, // Keep it square
-            backgroundImage: `url(/assets/${piece}.svg)`,
-            backgroundSize: "contain", // Ensure it fits within the square
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-          }}
-        />
-      );
-    });
+  //   pieces.forEach((piece) => {
+  //     pieceComponents[piece] = ({ squareWidth = 70 }) => (
+  //       <div
+  //         style={{
+  //           width: squareWidth, // Dynamically sized based on square width
+  //           height: squareWidth, // Keep it square
+  //           backgroundImage: `url(/assets/${piece}.svg)`,
+  //           backgroundSize: "contain", // Ensure it fits within the square
+  //           backgroundRepeat: "no-repeat",
+  //           backgroundPosition: "center",
+  //         }}
+  //       />
+  //     );
+  //   });
 
-    return pieceComponents;
-  }, []);
+  //   return pieceComponents;
+  // }, []);
 
-  const [selfMute, setSelfMute] = useState(false);
-  const [oppMute, setOppMute] = useState(false);
-  const [squareWidth, setSquareWidth] = useState(70);
-  useEffect(() => {
-    const updateSquareWidth = () => {
-      if (chessboardRef.current) {
-        const boardWidth = chessboardRef.current.offsetWidth;
-        setSquareWidth(boardWidth / 8);
-      }
-    };
+  // const [selfMute, setSelfMute] = useState(false);
+  // const [oppMute, setOppMute] = useState(false);
+  // const [squareWidth, setSquareWidth] = useState(70);
+  // useEffect(() => {
+  //   const updateSquareWidth = () => {
+  //     if (chessboardRef.current) {
+  //       const boardWidth = chessboardRef.current.offsetWidth;
+  //       setSquareWidth(boardWidth / 8);
+  //     }
+  //   };
 
-    updateSquareWidth();
-    window.addEventListener("resize", updateSquareWidth);
+  //   updateSquareWidth();
+  //   window.addEventListener("resize", updateSquareWidth);
 
-    return () => {
-      window.removeEventListener("resize", updateSquareWidth);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("resize", updateSquareWidth);
+  //   };
+  // }, []);
 
   const muteAudio = () => {};
   const unmuteAudio = () => {};
