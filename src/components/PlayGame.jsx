@@ -173,13 +173,10 @@ const PlayGame = () => {
       socket.connect();
       //when user goes back <-
       return () => {
-        console.log("cleanup from login useEffect");
         sessionStorage.setItem("resigned", "true");
         if (!roomNameRef.current) {
-          console.log("playerData.id: ", playerData.id);
 
           socket.emit("gameOverClearWaitings", playerData.id);
-          console.log("disconnecting");
 
           setTimeout(() => {
             socket.disconnect();
@@ -245,7 +242,6 @@ const PlayGame = () => {
 
   //game over- checkmate or draw to backend./
   useEffect(() => {
-    console.log("checkmate : ", game.isCheckmate());
     if (game.isCheckmate()) {
       setTimeout(() => {
         // setGameLoading(() => true);
@@ -261,17 +257,9 @@ const PlayGame = () => {
         losserId = opponent.id;
         setStatus(() => "Won");
       }
-      console.log(
-        "roomName : ",
-        roomName,
-        "winnerId : ",
-        winnerId,
-        "losserId : ",
-        losserId
-      );
       setTimeout(() => {
         if (you.id === todoId) {
-          console.log("checkmate from up here");
+          // console.log("checkmate from up here");
           socket.emit("checkmate", { roomName, winnerId, losserId });
         }
       }, 2000);
@@ -320,7 +308,6 @@ const PlayGame = () => {
   //resign when reload
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      console.log("when user reloads");
       // event.preventDefault();
       // event.returnValue = "";
       sessionStorage.setItem("resigned", "true");
@@ -364,7 +351,6 @@ const PlayGame = () => {
 
   //play with stranger , createRoom , joinRoom
   socket.on("connect", () => {
-    console.log("socket connected");
     if (mode === "online") {
       setGameLoading(() => true);
       socket.emit("playWithStranger", playerData.id);
@@ -380,7 +366,6 @@ const PlayGame = () => {
 
   socket.on("updateTodoIdFromBackend", (id) => {
     setTodoId(() => id);
-    console.log("todoId updated: ", id);
   });
 
   //ask to enter code
@@ -392,7 +377,7 @@ const PlayGame = () => {
 
   //invalid friend code
   socket.on("invalidCode", () => {
-    console.log("invalid code");
+    // console.log("invalid code");
     setGameLoading(() => false);
     setError("code", {
       type: "manual",
@@ -489,14 +474,14 @@ const PlayGame = () => {
     // Receive answer
     socket.on("answer", async ({ roomName, answer }) => {
       if (!PeerConnection) return;
-      console.log("Received answer for room", roomName);
+      // console.log("Received answer for room", roomName);
 
       try {
         // Set the remote description as the answer
         await PeerConnection.setRemoteDescription(
           new RTCSessionDescription(answer)
         );
-        console.log("Remote description set successfully for answer");
+        // console.log("Remote description set successfully for answer");
       } catch (error) {
         console.error("Error while handling answer", error);
       }
@@ -505,7 +490,7 @@ const PlayGame = () => {
     //ice-candidate
     socket.on("ice-candidate", async ({ candidate }) => {
       if (!PeerConnection) return;
-      console.log("ice-candidate: ", candidate);
+      // console.log("ice-candidate: ", candidate);
       await PeerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     });
 
@@ -548,7 +533,7 @@ const PlayGame = () => {
         )
       );
 
-      console.log("disconnected");
+      // console.log("disconnected");
       socket.emit("gameOverClearWaitings", you.id);
       // setGameLoading(() => false);
       setCalculation(() => false);
@@ -592,9 +577,9 @@ const PlayGame = () => {
 
   //backend
   socket.on("resignedGame", ({ roomName, playerId }) => {
-    console.log("resignedGame : ", roomName, playerId);
+    // console.log("resignedGame : ", roomName, playerId);
     if (you.id != (undefined || null) && opponent.id != (undefined || null)) {
-      console.log("you.id : ", you.id);
+      // console.log("you.id : ", you.id);
       if (you.id === playerId) {
         console.log("you resigned the game");
         setCalculation(() => true);
@@ -608,7 +593,7 @@ const PlayGame = () => {
         setStatus(() => (you.id === playerId ? "Lost" : "Won"));
 
         if (you.id === todoId) {
-          console.log("checkmate from down here");
+          // console.log("checkmate from down here");
 
           socket.emit("checkmate", {
             roomName,
