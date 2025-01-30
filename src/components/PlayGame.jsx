@@ -5,9 +5,9 @@ import React, {
   useState,
   useMemo,
   useRef,
-  forwardRef,
   useCallback,
 } from "react";
+import ReactPlayer from "react-player";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
@@ -27,12 +27,9 @@ const PlayGame = () => {
     []
   );
 
-  // let peer;
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { mode } = useParams();
-  // console.log("mode: ", mode);
 
   const [game, setGame] = useState(new Chess());
   const [position, setPosition] = useState(game.fen());
@@ -75,6 +72,73 @@ const PlayGame = () => {
 
   const [squareWidth, setSquareWidth] = useState(70);
   const chessboardRef = useRef(null);
+
+  const peerConnectionRef = useRef(null);
+  const [localStream, setLocalStream] = useState(null);
+  const [remoteStream, setRemoteStream] = useState(null);
+
+  //initial PeerConnection
+  useEffect(() => {
+    if (!peerConnectionRef.current) {
+      console.log("PeerConnection created");
+
+      const PeerConnection = new RTCPeerConnection({
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      });
+      peerConnectionRef.current = PeerConnection;
+
+      PeerConnection.onicecandidate = (event) => {
+        console.log("got ice-candidate of the user");
+
+        if (event.candidate) {
+          console.log("event.candidate triggered");
+
+          socket.emit("ice-candidate", {
+            candidate: event.candidate,
+            roomName: roomNameRef.current,
+          });
+        }
+      };
+    }
+  }, []);
+
+  //listening to remoteStream
+  const handleRemoteStream = useCallback((event) => {
+    const streams = event.streams;
+    setRemoteStream(() => streams[0]); //video stream
+  }, []);
+
+  //access localStream send localStream to peerConnection
+  const sendLocalStream = useCallback(async () => {
+    console.log("sendLocalStream called");
+    await navigator.mediaDevices
+      .getUserMedia({
+        audio: true,
+        video: true,
+      })
+      .then((stream) => {
+        setLocalStream(stream);
+        console.log({ stream });
+        stream.getTracks().forEach((track) => {
+          peerConnectionRef.current.addTrack(track, stream);
+        });
+      })
+      .catch((error) => console.error("Error accessing media devices:", error));
+  }, []);
+
+  //listen to remote stream
+  useEffect(() => {
+    peerConnectionRef.current.addEventListener("track", handleRemoteStream);
+    // sendLocalStream();
+
+    //clean up to prevent re-renders
+    return () => {
+      peerConnectionRef.current.removeEventListener(
+        "track",
+        handleRemoteStream
+      );
+    };
+  }, [peerConnectionRef.current, handleRemoteStream]);
 
   // full screen
   const requestFullscreen = () => {
@@ -351,190 +415,14 @@ const PlayGame = () => {
     console.log("Waiting for a player to join: ", roomName);
   });
 
-  let localStream;
-  // const [localStream, setLocalStream] = useState(null);
   //start the game
   socket.on("startTheGame", async (players) => {
     //audio access
-    (async () => {
-      try {
-        console.log("startMyAudio called");
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        localStream = stream;
-        // setLocalStream(() => stream);
-        console.log({ stream });
-      } catch (error) {
-        console.log("error in startMyAudio: ", error);
-      }
-    })();
+    await sendLocalStream();
 
-    let PeerConnection;
-    setTimeout(async () => {
-      PeerConnection = (() => {
-        // if (!localStream) return;
-        console.log("PeerConnection called");
-
-        let peerConnection;
-
-        const createPeerConnection = () => {
-          const config = {
-            iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-          };
-          peerConnection = new RTCPeerConnection(config);
-
-          console.log("peer to peer connection localStream: ", localStream);
-
-          //add localStream to peer connection
-          if (localStream) {
-            console.log("Adding tracks to peer connection...");
-            localStream.getTracks().forEach((track) => {
-              peerConnection.addTrack(track, localStream);
-            });
-          } else {
-            console.log("localStream is not available yet");
-          }
-
-          //listen to ice candidate
-          peerConnection.onicecandidate = async function (event) {
-            console.log("got ice-candidate of the user");
-            if (event.candidate) {
-              socket.emit("ice-candidate", {
-                roomName: roomNameRef.current,
-                candidate: event.candidate,
-              });
-            }
-          };
-          return peerConnection;
-        };
-
-        return {
-          getInstance: () => {
-            if (!peerConnection) {
-              peerConnection = createPeerConnection();
-            }
-            return peerConnection;
-          },
-        };
-      })();
-
-      const createOffer = async () => {
-        if (!PeerConnection) return;
-        const pc = await PeerConnection?.getInstance();
-        console.log("in create offer pc: ", pc);
-        const offer = await pc.createOffer();
-        console.log({ offer });
-        await pc.setLocalDescription(offer);
-        socket.emit("offer", {
-          offer: pc.localDescription,
-          roomName: roomNameRef.current,
-        });
-      };
-
-      await createOffer();
-    }, 800);
-
-    // Receive offer
-    socket.on("offer", async ({ offer }) => {
-      if (!PeerConnection) return;
-      console.log("Received offer", offer);
-
-      const pc = await PeerConnection.getInstance();
-      console.log("PeerConnection instance:", pc);
-
-      // Ensure we are in the correct state to handle the offer
-      if (pc.signalingState !== "stable") {
-        console.log(
-          "PeerConnection signaling state is not stable, waiting for stable state..."
-        );
-        return;
-      }
-
-      try {
-        // Set the remote description as the offer
-        await pc.setRemoteDescription(new RTCSessionDescription(offer));
-        console.log("Remote description set successfully");
-
-        // Create and send the answer
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        console.log("Answer created and local description set");
-
-        socket.emit("answer", {
-          roomName: roomNameRef.current,
-          answer: pc.localDescription,
-        });
-      } catch (error) {
-        console.error("Error while handling offer", error);
-      }
-    });
-
-    // Receive answer
-    socket.on("answer", async ({ roomName, answer }) => {
-      if (!PeerConnection) return;
-      console.log("Received answer for room", roomName);
-
-      const pc = await PeerConnection.getInstance();
-      console.log("PeerConnection instance:", pc);
-
-      // Ensure we are in the correct state to handle the answer
-      if (pc.signalingState !== "have-remote-offer") {
-        console.log(
-          "PeerConnection signaling state is not 'have-remote-offer', waiting for offer..."
-        );
-        return;
-      }
-
-      try {
-        // Set the remote description as the answer
-        await pc.setRemoteDescription(new RTCSessionDescription(answer));
-        console.log("Remote description set successfully for answer");
-      } catch (error) {
-        console.error("Error while handling answer", error);
-      }
-    });
-
-    //receive offer
-    // socket.on("offer", async ({ offer }) => {
-    //   console.log("in offer PeerConnection: ", PeerConnection);
-
-    //   console.log({ offer });
-
-    //   const pc = await PeerConnection.getInstance();
-    //   console.log({ pc });
-    //   //set remoteDescription to peerConnection
-    //   await pc.setRemoteDescription(offer);
-
-    //   //create answer
-    //   const answer = await pc.createAnswer();
-    //   await pc.setLocalDescription(answer);
-
-    //   console.log({ answer });
-
-    //   socket.emit("answer", {
-    //     roomName: roomNameRef.current,
-    //     answer: pc.localDescription,
-    //   });
-    // });
-
-    // //receive answer
-    // socket.on("answer", async ({ roomName, answer }) => {
-    //   console.log({ roomName, answer });
-
-    //   const pc = await PeerConnection.getInstance();
-    //   await pc.setRemoteDescription(answer);
-    // });
-
-    //ice-candidate
-    socket.on("ice-candidate", async ({ candidate }) => {
-      if (!PeerConnection) return;
-      console.log("ice-candidate: ", candidate);
-      const pc = PeerConnection.getInstance();
-      await pc.addIceCandidate(new RTCIceCandidate(candidate));
-    });
-
+    roomNameRef.current = players.roomName;
     todoIdRef.current = players.todoId;
+
     setTodoId(players.todoId);
     setAskToEnterCode(() => false);
     setEnterCode(() => false);
@@ -553,7 +441,243 @@ const PlayGame = () => {
     opponentRef.current =
       players.player1.id === playerData.id ? players.player2 : players.player1;
     setGameLoading(() => false);
+
+    // let PeerConnection;
+    // setTimeout(async () => {
+    //   PeerConnection = (() => {
+    //     // if (!localStream) return;
+    //     console.log("PeerConnection called");
+
+    //     let peerConnection;
+
+    //     const createPeerConnection = () => {
+    //       const config = {
+    //         iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    //       };
+    //       peerConnection = new RTCPeerConnection(config);
+
+    //       console.log("peer to peer connection localStream: ", localStream);
+
+    //       //add localStream to peer connection
+    //       if (localStream) {
+    //         console.log("Adding tracks to peer connection...");
+    //         localStream.getTracks().forEach((track) => {
+    //           peerConnection.addTrack(track, localStream);
+    //         });
+    //       } else {
+    //         console.log("localStream is not available yet");
+    //       }
+
+    //       //listen to ice candidate
+    //       peerConnection.onicecandidate = async function (event) {
+    //         console.log("got ice-candidate of the user");
+    //         if (event.candidate) {
+    //           socket.emit("ice-candidate", {
+    //             roomName: roomNameRef.current,
+    //             candidate: event.candidate,
+    //           });
+    //         }
+    //       };
+    //       return peerConnection;
+    //     };
+
+    //     return {
+    //       getInstance: () => {
+    //         if (!peerConnection) {
+    //           peerConnection = createPeerConnection();
+    //         }
+    //         return peerConnection;
+    //       },
+    //     };
+    //   })();
+
+    // if (todoIdRef.current === playerData.id) {
+    //   const createOffer = async () => {
+    //     if (!PeerConnection) return;
+    //     // const pc = await PeerConnection?.getInstance();
+    //     // console.log("in create offer pc: ", pc);
+    //     const offer = await PeerConnection.createOffer();
+    //     console.log({ offer });
+    //     await PeerConnection.setLocalDescription(offer);
+    //     socket.emit("offer", {
+    //       offer: PeerConnection.localDescription,
+    //       roomName: roomNameRef.current,
+    //     });
+    //   };
+
+    //   await createOffer();
+    // }
+    // }, 800);
+
+    // Receive offer
+    // socket.on("offer", async ({ offer }) => {
+    //   if (!PeerConnection) return;
+    //   console.log("Received offer", offer);
+    //   // Ensure we are in the correct state to handle the offer
+    //   // if (PeerConnection.signalingState !== "stable") {
+    //   //   console.log(
+    //   //     "PeerConnection signaling state is not stable, waiting for stable state..."
+    //   //   );
+    //   //   return;
+    //   // }
+
+    //   try {
+    //     // Set the remote description as the offer
+    //     await PeerConnection.setRemoteDescription(
+    //       new RTCSessionDescription(offer)
+    //     );
+    //     console.log("Remote description set successfully");
+
+    //     // Create and send the answer
+    //     const answer = await PeerConnection.createAnswer();
+    //     await PeerConnection.setLocalDescription(answer);
+    //     console.log("Answer created and local description set");
+
+    //     socket.emit("answer", {
+    //       roomName: roomNameRef.current,
+    //       answer: PeerConnection.localDescription,
+    //     });
+    //   } catch (error) {
+    //     console.error("Error while handling offer", error);
+    //   }
+    // });
+
+    // // Receive answer
+    // socket.on("answer", async ({ roomName, answer }) => {
+    //   if (!PeerConnection) return;
+    //   console.log("Received answer for room", roomName);
+
+    //   // const pc = await PeerConnection.getInstance();
+    //   // console.log("PeerConnection instance:", pc);
+
+    //   // Ensure we are in the correct state to handle the answer
+    //   // if (PeerConnection.signalingState !== "have-remote-offer") {
+    //   //   console.log(
+    //   //     "PeerConnection signaling state is not 'have-remote-offer', waiting for offer..."
+    //   //   );
+    //   //   return;
+    //   // }
+
+    //   try {
+    //     // Set the remote description as the answer
+    //     await PeerConnection.setRemoteDescription(
+    //       new RTCSessionDescription(answer)
+    //     );
+    //     console.log("Remote description set successfully for answer");
+    //   } catch (error) {
+    //     console.error("Error while handling answer", error);
+    //   }
+    // });
+
+    // //ice-candidate
+    // socket.on("ice-candidate", async ({ candidate }) => {
+    //   if (!PeerConnection) return;
+    //   console.log("ice-candidate: ", candidate);
+    //   // const pc = PeerConnection.getInstance();
+    //   await PeerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    // });
   });
+
+  useEffect(() => {
+    // (async () => {
+    if (!peerConnectionRef.current) return;
+    console.log(
+      "in useEffect peerConnectionRef.current: ",
+      peerConnectionRef.current
+    );
+    console.log("todoIdRef : ", todoIdRef.current);
+
+    const PeerConnection = peerConnectionRef.current;
+
+    const createOffer = async () => {
+      if (!PeerConnection) return;
+      const offer = await PeerConnection.createOffer();
+      await PeerConnection.setLocalDescription(offer);
+      socket.emit("offer", {
+        offer: PeerConnection.localDescription,
+        roomName: roomNameRef.current,
+      });
+    };
+
+    if (todoIdRef.current === playerData.id) {
+      createOffer();
+    }
+    // Receive offer
+    socket.on("offer", async ({ offer }) => {
+      if (!PeerConnection) return;
+      console.log("Received offer", offer);
+      // Ensure we are in the correct state to handle the offer
+      // if (PeerConnection.signalingState !== "stable") {
+      //   console.log(
+      //     "PeerConnection signaling state is not stable, waiting for stable state..."
+      //   );
+      //   return;
+      // }
+
+      try {
+        // Set the remote description as the offer
+        await PeerConnection.setRemoteDescription(
+          new RTCSessionDescription(offer)
+        );
+        console.log("Remote description set successfully");
+
+        // Create and send the answer
+        const answer = await PeerConnection.createAnswer();
+        await PeerConnection.setLocalDescription(answer);
+        console.log("Answer created and local description set");
+
+        socket.emit("answer", {
+          roomName: roomNameRef.current,
+          answer: PeerConnection.localDescription,
+        });
+      } catch (error) {
+        console.error("Error while handling offer", error);
+      }
+    });
+
+    // Receive answer
+    socket.on("answer", async ({ roomName, answer }) => {
+      if (!PeerConnection) return;
+      console.log("Received answer for room", roomName);
+
+      // const pc = await PeerConnection.getInstance();
+      // console.log("PeerConnection instance:", pc);
+
+      // Ensure we are in the correct state to handle the answer
+      // if (PeerConnection.signalingState !== "have-remote-offer") {
+      //   console.log(
+      //     "PeerConnection signaling state is not 'have-remote-offer', waiting for offer..."
+      //   );
+      //   return;
+      // }
+
+      try {
+        // Set the remote description as the answer
+        await PeerConnection.setRemoteDescription(
+          new RTCSessionDescription(answer)
+        );
+        console.log("Remote description set successfully for answer");
+
+        // handleRemoteStream();
+      } catch (error) {
+        console.error("Error while handling answer", error);
+      }
+    });
+
+    //ice-candidate
+    socket.on("ice-candidate", async ({ candidate }) => {
+      if (!PeerConnection) return;
+      console.log("ice-candidate: ", candidate);
+      // const pc = PeerConnection.getInstance();
+      await PeerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    });
+
+    return () => {
+      socket.off("offer");
+      socket.off("answer");
+      socket.off("ice-candidate");
+    };
+  }, [todoIdRef?.current]);
 
   // //receive offer
   // socket.on("offer", async ({ offer }) => {
@@ -1103,6 +1227,27 @@ const PlayGame = () => {
           )}
           {!loading && !calculation && opponent.handle && (
             <div className="w-full h-full flex-col justify-center items-center">
+              <div className="gap-2 flex">
+                {/* <video
+                  ref={localStream?.srcObject}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="border-4 border-white"
+                /> */}
+                {/* <video
+                  ref={remoteStream?.srcObject}
+                  autoPlay
+                  playsInline
+                  className="border-4 border-red-700"
+                /> */}
+                <div className="border-4 border-white">
+                  <ReactPlayer url={localStream} playing muted />
+                </div>
+                <div className="border-4 border-red-700">
+                  <ReactPlayer url={remoteStream} playing />
+                </div>
+              </div>
               <Button
                 bgColor="bg-gray-950"
                 text={"Resign"}
