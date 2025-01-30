@@ -4,7 +4,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { Button, LoadingBars } from "./components";
 import { Chessboard } from "react-chessboard";
 import { useDispatch } from "react-redux";
-// import ReactPlayer from "react-player";
+import ReactPlayer from "react-player";
 import {
   getCurrentPlayer,
   refreshAccessToken,
@@ -46,107 +46,202 @@ const App = () => {
     })();
   }, [dispatch]);
 
+  const localStream = "",
+    remoteStream = "";
+
+  const customPieces = useMemo(() => {
+    const pieces = [
+      "wP",
+      "wN",
+      "wB",
+      "wR",
+      "wQ",
+      "wK",
+      "bP",
+      "bN",
+      "bB",
+      "bR",
+      "bQ",
+      "bK",
+    ];
+    const pieceComponents = {};
+
+    pieces.forEach((piece) => {
+      pieceComponents[piece] = ({ squareWidth = 70 }) => (
+        <div
+          style={{
+            width: squareWidth, // Dynamically sized based on square width
+            height: squareWidth, // Keep it square
+            backgroundImage: `url(/assets/${piece}.svg)`,
+            backgroundSize: "contain", // Ensure it fits within the square
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+          }}
+        />
+      );
+    });
+
+    return pieceComponents;
+  }, []);
+
   const [selfMute, setSelfMute] = useState(false);
   const [oppMute, setOppMute] = useState(false);
+  const [squareWidth, setSquareWidth] = useState(70);
+  useEffect(() => {
+    const updateSquareWidth = () => {
+      if (chessboardRef.current) {
+        const boardWidth = chessboardRef.current.offsetWidth;
+        setSquareWidth(boardWidth / 8);
+      }
+    };
+
+    updateSquareWidth();
+    window.addEventListener("resize", updateSquareWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateSquareWidth);
+    };
+  }, []);
+
+  const muteAudio = () => {};
+  const unmuteAudio = () => {};
   return (
     // <div className="bg-gray-800 min-h-screen border-blue-500 selection:bg-[#a45633]">
     <>
       <Outlet />
-      {/* <div className="bg-slate-700 w-32 m-2 rounded-lg px-4 py-2 flex justify-between items-center">
-        {!selfMute && <i className="fas fa-microphone cursor-pointer"></i>}
-        {selfMute && <i className="fas fa-microphone-slash cursor-pointer"></i>}
-        {oppMute && <i className="fas fa-volume-mute cursor-pointer"></i>}
-        {!oppMute && <i className="fas fa-volume-up cursor-pointer"></i>}
-      </div> */}
-      {/* <LoadingBars /> */}
-      {/* <div className="w-full h-full flex-col justify-center items-center">
-        <Button
-          bgColor="bg-gray-950"
-          text={"Resign"}
-          width="w-24"
-          // onClick={() => setResignGameMsg(true)}
-          className={`absolute top-2 right-2 text-sm border-2 border-gray-400 px-2 py-2 text-slate-200`}
-        />
-        <div className="w-full px-4 mx-auto flex flex-col justify-center items-center h-screen">
-          <p className="text-center italic text-lg text-white font-semibold mb-2">
-            KAMMO : RATING 1200
+      {/* <div className="w-full px-4 mx-auto flex flex-col justify-center items-center h-screen">
+        <div className="flex justify-center items-center gap-4">
+          <p className="text-center italic text-lg text-white font-semibold">
+            TEST : RATING 1200
           </p>
-
-          <div
-            ref={chessboardRef}
-            // style={{ width: "100%", height: "100%" }}
-            className="w-full h-full max-w-[510px] mx-auto max-h-[510px] flex-col justify-center items-center"
-          >
-            <Chessboard
-              id="PlayVsRandom"
-              // position={position}
-              // onPieceDrop={onDrop}
-              // boardOrientation={color}
-              customBoardStyle={{
-                borderRadius: "8px",
-                // borderWidth: "2px",
-                boxShadow: "0 4px 15px rgba(0, 0, 0, 0.7)",
-                width: "100%",
-                height: "100%",
-                maxWidth: "90vw",
-                maxHeight: "90vh",
-                minWidth: "200px",
-                minHeight: "200px",
-                backgroundColor: "#f0d9b5",
-              }}
-              // customSquare={CustomSquareRenderer}
-              customDarkSquareStyle={{
-                backgroundColor: "#31363F",
-                width: squareWidth, // Dynamically set width
-                height: squareWidth, // Dynamically set height
-              }}
-              customLightSquareStyle={{
-                backgroundColor: "#d9d7b6",
-                width: squareWidth, // Dynamically set width
-                height: squareWidth, // Dynamically set height
-              }}
-              customPieces={customPieces}
-              onPieceDragBegin={(piece, sourceSquare) => {
-                document.body.style.overflow = "hidden";
-              }}
-              onPieceDragEnd={(piece, sourceSquare, targetSquare) => {
-                document.body.style.overflow = ""; // Restore scrolling
-              }}
-            />
+          <div className="flex mx-auto bg-slate-700 w-24 m-2 rounded-lg px-4 py-2  justify-between items-center">
+            <div className="border hidden">
+              <ReactPlayer
+                playing
+                url={localStream}
+                muted
+                width="0px"
+                height="0px"
+              />
+              <ReactPlayer
+                playing
+                url={remoteStream}
+                muted={oppMute}
+                width="0px"
+                height="0px"
+              />
+            </div>
+            {!selfMute && (
+              <i
+                onClick={muteAudio}
+                className="fas fa-microphone cursor-pointer"
+              ></i>
+            )}
+            {selfMute && (
+              <i
+                onClick={unmuteAudio}
+                className="fas fa-microphone-slash cursor-pointer"
+              ></i>
+            )}
+            {oppMute && (
+              <i
+                onClick={() => setOppMute(false)}
+                className="fas fa-volume-mute cursor-pointer"
+              ></i>
+            )}
+            {!oppMute && (
+              <i
+                onClick={() => setOppMute(true)}
+                className="fas fa-volume-up cursor-pointer"
+              ></i>
+            )}
           </div>
         </div>
-      </div> */}
-      {/* <div className="fixed inset-0 flex items-center justify-center z-20">
-        <div className="relative w-72 h-72 bg-gray-800 text-gray-300 rounded-lg shadow-lg flex flex-col items-center justify-center">
-          <button
-            onClick={() => setResignGameMsg(false)}
-            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-          >
-            &times;
-          </button>
-          <p className="p-3 text-lg font-semibold text-center mb-2">
-            <span className="text-red-500">WARNING!</span> Resigning the game will affect your rating and
-            count as a loss.
-          </p>
-          <Button
-            bgColor="bg-gray-950"
-            text={"Resign"}
-            width="w-24"
-            className={`text-sm border-2 border-gray-400 px-2 py-2 text-slate-200`}
+
+        <div
+          ref={chessboardRef}
+          // style={{ width: "100%", height: "100%" }}
+          className="w-full h-full max-w-[510px] mx-auto max-h-[510px] flex-col justify-center items-center border"
+        >
+          <Chessboard
+            id="PlayVsRandom"
+            // position={position}
+            // onPieceDrop={onDrop}
+            // boardOrientation={color}
+            customBoardStyle={{
+              borderRadius: "8px",
+              // borderWidth: "2px",
+              boxShadow: "0 4px 15px rgba(0, 0, 0, 0.7)",
+              width: "100%",
+              height: "100%",
+              maxWidth: "90vw",
+              maxHeight: "90vh",
+              minWidth: "200px",
+              minHeight: "200px",
+              backgroundColor: "#f0d9b5",
+            }}
+            // customSquare={CustomSquareRenderer}
+            customDarkSquareStyle={{
+              backgroundColor: "#31363F",
+              width: squareWidth, // Dynamically set width
+              height: squareWidth, // Dynamically set height
+            }}
+            customLightSquareStyle={{
+              backgroundColor: "#d9d7b6",
+              width: squareWidth, // Dynamically set width
+              height: squareWidth, // Dynamically set height
+            }}
+            customPieces={customPieces}
+            onPieceDragBegin={(piece, sourceSquare) => {
+              document.body.style.overflow = "hidden";
+            }}
+            onPieceDragEnd={(piece, sourceSquare, targetSquare) => {
+              document.body.style.overflow = ""; // Restore scrolling
+            }}
           />
-        </div>
-      </div> */}
-      {/* <>
-        <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm z-10"></div>
+          <div className="hidden bg-slate-700 border w-32 m-2 rounded-lg px-4 py-2  justify-between items-center mx-auto">
+            <ReactPlayer
+              playing
+              url={localStream}
+              muted
+              width="0px"
+              height="0px"
+            />
 
-        <div className="fixed inset-0 flex items-center justify-center z-20">
-          <div className="relative w-72 h-72 bg-[#BC8F8F] rounded-lg shadow-lg flex flex-col items-center justify-center">
-            <p className="text-center p-3 text-lg font-semibold text-gray-200">
-              KAMMO has resigned the game. You Won!!! 🎉
-            </p>
+            <ReactPlayer
+              playing
+              url={remoteStream}
+              muted={oppMute}
+              width="0px"
+              height="0px"
+            />
+            {!selfMute && (
+              <i
+                onClick={muteAudio}
+                className="fas fa-microphone cursor-pointer"
+              ></i>
+            )}
+            {selfMute && (
+              <i
+                onClick={unmuteAudio}
+                className="fas fa-microphone-slash cursor-pointer"
+              ></i>
+            )}
+            {oppMute && (
+              <i
+                onClick={() => setOppMute(false)}
+                className="fas fa-volume-mute cursor-pointer"
+              ></i>
+            )}
+            {!oppMute && (
+              <i
+                onClick={() => setOppMute(true)}
+                className="fas fa-volume-up cursor-pointer"
+              ></i>
+            )}
           </div>
         </div>
-      </> */}
+      </div> */}
     </>
   );
 };

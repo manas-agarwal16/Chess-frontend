@@ -987,7 +987,7 @@ const PlayGame = () => {
           )}
           {!loading && !calculation && opponent.handle && (
             <div className="w-full h-full flex-col justify-center items-center">
-              <div className="bg-slate-700 w-32 m-2 rounded-lg px-4 py-2 flex justify-between items-center">
+              {/* <div className="bg-slate-700 w-32 m-2 rounded-lg px-4 py-2 flex justify-between items-center">
                 <ReactPlayer
                   playing
                   url={localStream}
@@ -1027,7 +1027,7 @@ const PlayGame = () => {
                     className="fas fa-volume-up cursor-pointer"
                   ></i>
                 )}
-              </div>
+              </div> */}
               <Button
                 bgColor="bg-gray-950"
                 text={"Resign"}
@@ -1036,9 +1036,53 @@ const PlayGame = () => {
                 className={`absolute top-2 right-2 text-sm border-2 border-gray-400 px-2 py-2 text-slate-200`}
               />
               <div className="w-full px-4 mx-auto flex flex-col justify-center items-center h-screen">
-                <p className="text-center italic text-lg text-white font-semibold mb-2">
-                  {opponent.handle?.toUpperCase()} : RATING {opponent.rating}
-                </p>
+                <div className="flex justify-center items-center gap-4">
+                  <p className="text-center italic text-lg text-white font-semibold">
+                    {opponent.handle?.toUpperCase()} : RATING {opponent.rating}
+                  </p>
+                  <div className="flex mx-auto bg-slate-700 w-24 m-2 rounded-lg px-4 py-2  justify-between items-center">
+                    <div className="border hidden">
+                      <ReactPlayer
+                        playing
+                        url={localStream}
+                        muted
+                        width="0px"
+                        height="0px"
+                      />
+                      <ReactPlayer
+                        playing
+                        url={remoteStream}
+                        muted={oppMute}
+                        width="0px"
+                        height="0px"
+                      />
+                    </div>
+                    {!selfMute && (
+                      <i
+                        onClick={muteAudio}
+                        className="fas fa-microphone cursor-pointer"
+                      ></i>
+                    )}
+                    {selfMute && (
+                      <i
+                        onClick={unmuteAudio}
+                        className="fas fa-microphone-slash cursor-pointer"
+                      ></i>
+                    )}
+                    {oppMute && (
+                      <i
+                        onClick={() => setOppMute(false)}
+                        className="fas fa-volume-mute cursor-pointer"
+                      ></i>
+                    )}
+                    {!oppMute && (
+                      <i
+                        onClick={() => setOppMute(true)}
+                        className="fas fa-volume-up cursor-pointer"
+                      ></i>
+                    )}
+                  </div>
+                </div>
 
                 <div
                   ref={chessboardRef}
