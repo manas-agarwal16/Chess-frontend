@@ -22,15 +22,19 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 1. Play Online - Chess Master helps you find the perfect opponent with similar ratings, so every game feels challenging and rewarding.
 2. Play with Friend - We also give you the option to connect with any of your friends for a fun and friendly competition.
 
-<div style="display: flex; justify-content: center align-items: center">
-  <img src="./src/assets/homeSS.png" alt="homePage" width="500">
-  <img src="./src/assets/gameSS.png" alt="game" width="500">
-</div>
+<table>
+  <tr>
+  <td> <img src="./src/assets/homeSS.png" alt="homePage" width="500"> </td>
+  <td><img src="./src/assets/gameSS.png" alt="game" width="500"> </td>
+  </tr>
+</table>
 
 3. Tracks your progress - Chess Master keeps track of your rating changes and past games, helping you analyze your best moves and mistakes. Learn from every match and improve with real insights.
 
-<div>
-  <img src="./src/assets/profileSS.png" alt="profile" width="370">
-  <img src="./src/assets/historySS.png" alt="history" width="370">
-  <img src="./src/assets/history2SS.png" alt="history" width="370">
-</div>
+<table>
+  <tr>
+    <td> <img src="./src/assets/profileSS.png" alt="profile" width="370"></td>
+    <td><img src="./src/assets/historySS.png" alt="history" width="370"></td>
+    <td><img src="./src/assets/history2SS.png" alt="history" width="370"></td>
+  </tr>
+</table>
