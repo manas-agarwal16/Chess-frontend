@@ -1,15 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Input, CenterSpinner, Heading } from "./index";
 import { useForm } from "react-hook-form";
 import { register as registerPlayer } from "../store/features/authSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { EyeIcon, EyeOffIcon } from "@heroicons/react/solid";
 import chessImage from "../assets/chessmasterHomeImage.jpg";
 
 const Register = () => {
   const { loading } = useSelector((state) => state.auth);
 
+  const [passwordVisible, setPasswordVisible] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
+  };
   const dispatch = useDispatch();
   const navigate = useNavigate();
   let {
@@ -123,19 +129,25 @@ const Register = () => {
                 >
                   Password
                 </label>
-                <Input
-                  {...register("password", {
-                    required: "Password is required",
-                    minLength: {
-                      value: 8,
-                      message: "Password must be at least 8 characters",
-                    },
-                  })}
-                  type="password"
-                  id="password"
-                  placeholder="Enter your password"
-                  className="w-full p-2 rounded-md focus:outline-none focus:ring-2"
-                />
+                <div className="flex w-full rounded-md bg-slate-700 focus:ring-2 focus:ring-blue-500">
+                  <input
+                    {...register("password", { required: true })}
+                    id="password"
+                    type={passwordVisible ? "text" : "password"}
+                    placeholder="password"
+                    className={`text-sm w-full p-2 rounded-md focus:outline-none  text-gray-200 bg-slate-700 placeholder:text-gray-200`}
+                  />
+                  <div
+                    onClick={togglePasswordVisibility}
+                    className="relative transform right-2 top-6 -translate-y-1/2 cursor-pointer"
+                  >
+                    {passwordVisible ? (
+                      <EyeOffIcon className="relative h-5 w-5 top-1 text-gray-400" /> // Eye off icon when password is visible
+                    ) : (
+                      <EyeIcon className="relative h-5 w-5 top-1 text-gray-400" /> // Eye icon when password is hidden
+                    )}
+                  </div>
+                </div>
                 {errors.password && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.password.message}

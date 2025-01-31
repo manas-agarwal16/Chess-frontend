@@ -30,49 +30,53 @@ const App = () => {
     })();
   }, [dispatch]);
 
-  // const localStream = "",
-  //   remoteStream = "";
+  const localStream = "",
+    remoteStream = "";
 
-  // const customPieces = useMemo(() => {
-  //   const pieces = [
-  //     "wP",
-  //     "wN",
-  //     "wB",
-  //     "wR",
-  //     "wQ",
-  //     "wK",
-  //     "bP",
-  //     "bN",
-  //     "bB",
-  //     "bR",
-  //     "bQ",
-  //     "bK",
-  //   ];
-  //   const pieceComponents = {};
+  const customPieces = useMemo(() => {
+    const pieces = [
+      "wP",
+      "wN",
+      "wB",
+      "wR",
+      "wQ",
+      "wK",
+      "bP",
+      "bN",
+      "bB",
+      "bR",
+      "bQ",
+      "bK",
+    ];
+    const pieceComponents = {};
 
-  //   pieces.forEach((piece) => {
-  //     pieceComponents[piece] = ({ squareWidth = 70 }) => (
-  //       <div
-  //         style={{
-  //           width: squareWidth, // Dynamically sized based on square width
-  //           height: squareWidth, // Keep it square
-  //           backgroundImage: `url(/assets/${piece}.svg)`,
-  //           backgroundSize: "contain", // Ensure it fits within the square
-  //           backgroundRepeat: "no-repeat",
-  //           backgroundPosition: "center",
-  //         }}
-  //       />
-  //     );
-  //   });
+    pieces.forEach((piece) => {
+      pieceComponents[piece] = ({ squareWidth = 70 }) => (
+        <div
+          style={{
+            width: squareWidth, // Dynamically sized based on square width
+            height: squareWidth, // Keep it square
+            backgroundImage: `url(/assets/${piece}.svg)`,
+            backgroundSize: "contain", // Ensure it fits within the square
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+          }}
+        />
+      );
+    });
 
-  //   return pieceComponents;
-  // }, []);
+    return pieceComponents;
+  }, []);
 
-  // const [selfMute, setSelfMute] = useState(false);
-  // const [oppMute, setOppMute] = useState(false);
-  // const [squareWidth, setSquareWidth] = useState(70);
+  const [selfMute, setSelfMute] = useState(false);
+  const [oppMute, setOppMute] = useState(false);
+  const [squareWidth, setSquareWidth] = useState(70);
   // useEffect(() => {
+  //   console.log('set square width called');
+    
   //   const updateSquareWidth = () => {
+  //     console.log('updateSquareWidth called chessboradRef.current : ', chessboardRef.current);
+      
   //     if (chessboardRef.current) {
   //       const boardWidth = chessboardRef.current.offsetWidth;
   //       setSquareWidth(boardWidth / 8);

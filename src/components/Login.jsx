@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, CenterSpinner, Input, Heading } from "./index.js";
 import { useNavigate } from "react-router-dom";
@@ -6,11 +6,16 @@ import { useForm } from "react-hook-form";
 import { login as loginPlayer } from "../store/features/authSlice.js";
 import { Link } from "react-router-dom";
 import chessImage from "../assets/chessmasterHomeImage.jpg";
+import { EyeIcon, EyeOffIcon } from "@heroicons/react/solid";
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading } = useSelector((state) => state.auth);
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
+  };
   const {
     register,
     handleSubmit,
@@ -75,13 +80,25 @@ const Login = () => {
                 >
                   Password
                 </label>
-                <Input
-                  {...register("password", { required: true })}
-                  id="password"
-                  type="password"
-                  placeholder="password"
-                  className="w-full p-2 rounded-md focus:outline-none focus:ring-2"
-                />
+                <div className="flex w-full rounded-md bg-slate-700 focus:ring-2 focus:ring-blue-500">
+                  <input
+                    {...register("password", { required: true })}
+                    id="password"
+                    type={passwordVisible ? "text" : "password"}
+                    placeholder="password"
+                    className={`text-sm w-full p-2 rounded-md focus:outline-none  text-gray-200 bg-slate-700 placeholder:text-gray-200`}
+                  />
+                  <div
+                    onClick={togglePasswordVisibility}
+                    className="relative transform right-2 top-6 -translate-y-1/2 cursor-pointer"
+                  >
+                    {passwordVisible ? (
+                      <EyeOffIcon className="relative h-5 w-5 top-1 text-gray-400" /> // Eye off icon when password is visible
+                    ) : (
+                      <EyeIcon className="relative h-5 w-5 top-1 text-gray-400" /> // Eye icon when password is hidden
+                    )}
+                  </div>
+                </div>
                 {errors.password && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.password.message}

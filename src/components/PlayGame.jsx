@@ -224,6 +224,11 @@ const PlayGame = () => {
   }, [loginStatus, loading, navigate]);
 
   useEffect(() => {
+    console.log(
+      "set square width called chessboradRef.current : ",
+      chessboardRef.current
+    );
+
     const updateSquareWidth = () => {
       if (chessboardRef.current) {
         const boardWidth = chessboardRef.current.offsetWidth;
@@ -238,33 +243,6 @@ const PlayGame = () => {
       window.removeEventListener("resize", updateSquareWidth);
     };
   }, []);
-
-  //running fine
-  // useEffect(() => {
-  //   const handleBeforeUnload = (event) => {
-  //     console.log("beforeunload");
-  //     console.log("todoId: ", todoId);
-  //     console.log("opponent: ", opponent);
-
-  //     if (you.id == todoId) {
-  //       console.log("updating todoId and leaving the game");
-  //       socket.emit("updateTodoId", { id: opponent.id, roomName });
-  //     }
-  //     sessionStorage.setItem("resigned", "true");
-  //     handleResignGame();
-
-  //     // To trigger the browser's built-in confirmation dialog
-  //     event.preventDefault();
-  //     event.returnValue = ""; // Chrome requires returnValue to be set
-  //   };
-
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
-
-  //   // Cleanup on component unmount
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //   };
-  // }, [todoId, opponent, you, roomName]);
 
   //game over- checkmate or draw to backend./
   useEffect(() => {
