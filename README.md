@@ -11,9 +11,9 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 
 ## ScreenShot
 <div>
-  <img src="./src/assets/registerSS.png" alt="register" width="300">
-  <img src="./src/assets/verifyOtpSS.png" alt="verifyOTP" width="300">
-  <img src="./src/assets/loginSS.png" alt="login" width="300">
+  <img src="./src/assets/registerSS.png" alt="register" width="370">
+  <img src="./src/assets/verifyOtpSS.png" alt="verifyOTP" width="370">
+  <img src="./src/assets/loginSS.png" alt="login" width="370">
 </div>
 
 # Features
@@ -28,9 +28,9 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 3. Tracks your progress - Chess Master keeps track of your rating changes and past games, helping you analyze your best moves and mistakes. Learn from every match and improve with real insights.
 
 <div>
-  <img src="./src/assets/profileSS.png" alt="profile" width="400">
-  <img src="./src/assets/historySS.png" alt="history" width="400">
-  <img src="./src/assets/historySS2.png" alt="history" width="400">
+  <img src="./src/assets/profileSS.png" alt="profile" width="370">
+  <img src="./src/assets/historySS.png" alt="history" width="370">
+  <img src="./src/assets/historySS2.png" alt="history" width="370">
 </div>
 
 
