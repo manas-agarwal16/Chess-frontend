@@ -10,11 +10,13 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 ***ReactJS NodeJS PostgresSQL SequelizeORM Socket.io WebRTC***
 
 ## ScreenShot
-<div style="border: 2px solid white">
-  <img src="./src/assets/registerSS.png" alt="register" width="400">
-  <img src="./src/assets/verifyOtpSS.png" alt="verifyOTP" width="400">
-  <img src="./src/assets/loginSS.png" alt="login" width="400">
-</div>
+<table>
+  <tr>
+    <td><img src="./src/assets/registerSS.png" alt="register" width="400"></td>
+    <td><img src="./src/assets/verifyOtpSS.png" alt="verifyOTP" width="400"></td>
+    <td><img src="./src/assets/loginSS.png" alt="login" width="400"></td>
+  </tr>
+</table>
 
 # Features
 1. Play Online - Chess Master helps you find the perfect opponent with similar ratings, so every game feels challenging and rewarding.
