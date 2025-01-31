@@ -30,9 +30,5 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 <div>
   <img src="./src/assets/profileSS.png" alt="profile" width="370">
   <img src="./src/assets/historySS.png" alt="history" width="370">
-  <img src="./src/assets/historySS2.png" alt="history" width="370">
+  <img src="./src/assets/history2SS.png" alt="history" width="370">
 </div>
-
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
