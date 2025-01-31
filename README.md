@@ -3,19 +3,7 @@
 **Chess Master** is a platform built for chess enthusiasts who want to improve their skills and connect with others while playing. It’s not just about winning—it’s about growing together.
 
 # Technologies
-# Tech Stack
-
-# Tech Stack
-
-# Tech Stack
-
-<img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="50" height="50" style="display: inline-block;" />
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/64/Node.js_logo_2015.svg" width="50" height="50" style="display: inline-block;" />
-<img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" width="50" height="50" style="display: inline-block;" />
-<img src="https://sequelize.org/images/logo.svg" width="50" height="50" style="display: inline-block;" />
-<img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Socket-io.svg" width="50" height="50" style="display: inline-block;" />
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/WebRTC_logo.svg/1024px-WebRTC_logo.svg.png" width="50" height="50" style="display: inline-block;" />
-
+ReactJS NodeJS PostgresSQL SequelizeORM Socket.io WebRTC
 
 # Purpose
 Chess is more than just a game; it’s a journey of mastering patterns, strategies, and problem-solving. But what truly accelerates improvement is sharing ideas, discussing moves, and learning from one another. That’s where Chess Master comes in. We let you communicate live with your opponent during games, so you can exchange thoughts, share strategies, and support each other. Whether you're playing a friendly match with a friend or inviting your trainer for a game, Chess Master brings you closer to your goals as a team.
