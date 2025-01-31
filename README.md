@@ -5,10 +5,13 @@
 # Technologies
 # Tech Stack
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="50" height="50" />
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/64/Node.js_logo_2015.svg" width="50" height="50" />
-<img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" width="50" height="50" />
-<img src="https://sequelize.org/images/logo.svg" width="50" height="50" />
+# Tech Stack
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="50" height="50" style="display: inline-block;" />
+<img src="https://upload.wikimedia.org/wikipedia/commons/6/64/Node.js_logo_2015.svg" width="50" height="50" style="display: inline-block;" />
+<img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" width="50" height="50" style="display: inline-block;" />
+<img src="https://sequelize.org/images/logo.svg" width="50" height="50" style="display: inline-block;" />
+
 
 ![Socket.IO](https://upload.wikimedia.org/wikipedia/commons/2/2f/Socket-io.svg)
 ![WebRTC](https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/WebRTC_logo.svg/1024px-WebRTC_logo.svg.png)
