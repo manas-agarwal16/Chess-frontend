@@ -10,7 +10,7 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 ***ReactJS NodeJS PostgresSQL SequelizeORM Socket.io WebRTC***
 
 ### Frontend Tech Stack
-<div style="display: flex; flex-wrap: wrap;">
+<div style="display: flex; flex-wrap: wrap; gap: 20px;">
   <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="50" height="50" style="margin-right: 30px;" />
   <img src="https://www.svgrepo.com/show/303557/redux-logo.svg" width="50" height="50" style="margin-right: 30px;" />
   <img src="https://www.svgrepo.com/show/333609/tailwind-css.svg" width="50" height="50" style="margin-right: 30px;" />
