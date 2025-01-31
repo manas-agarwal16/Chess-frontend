@@ -3,7 +3,7 @@
 ## About Chess Master
 **Chess Master** is a platform built for chess enthusiasts who want to improve their skills and connect with others while playing. It’s not just about winning—it’s about growing together.  
 
-Backend Repository: &nbsp;[https://github.com/manas-agarwal16/Chess-backend](https://github.com/manas-agarwal16/Chess-backend)
+**Backend Repository**: &nbsp;[https://github.com/manas-agarwal16/Chess-backend](https://github.com/manas-agarwal16/Chess-backend)
 
 ## Purpose
 Chess is more than just a game; it’s a journey of mastering patterns, strategies, and problem-solving. But what truly accelerates improvement is sharing ideas, discussing moves, and learning from one another. That’s where Chess Master comes in. We let you communicate live with your opponent during games, so you can exchange thoughts, share strategies, and support each other. Whether you're playing a friendly match with a friend or inviting your trainer for a game, Chess Master brings you closer to your goals as a team.
@@ -40,7 +40,7 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 </div>
 
 
-## ScreenShots
+## Screenshots
 <table>
   <tr>
     <td><img src="./src/assets/registerSS.png" alt="register" width="400"></td>
