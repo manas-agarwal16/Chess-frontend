@@ -9,13 +9,14 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 ## Tech Stack
 ***ReactJS NodeJS PostgresSQL SequelizeORM Socket.io WebRTC***
 # Tech Stack
+# Tech Stack
 
-![React](https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg)
-![Node.js](https://www.svgrepo.com/show/303360/nodejs-logo.svg)
-![PostgreSQL](https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg)
-![Sequelize](https://github.com/user-attachments/assets/c857fb6c-1f5c-455f-a010-682a51f21d7c)
-![Socket.IO](https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Socket-io.svg/900px-Socket-io.svg.png?20200308235956)
-![WebRTC](https://www.svgrepo.com/show/354551/webrtc.svg)
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="50" height="50" />
+<img src="https://www.svgrepo.com/show/303360/nodejs-logo.svg" width="50" height="50" />
+<img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" width="50" height="50" />
+<img src="https://github.com/user-attachments/assets/c857fb6c-1f5c-455f-a010-682a51f21d7c" width="50" height="50" />
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Socket-io.svg/900px-Socket-io.svg.png?20200308235956" width="50" height="50" />
+<img src="https://www.svgrepo.com/show/354551/webrtc.svg" width="50" height="50" />
 
 
 ## ScreenShot
