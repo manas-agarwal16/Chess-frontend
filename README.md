@@ -70,5 +70,26 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
   </tr>
 </table>
 
+## Installation
+
+To run the application, you need to have node installed on your machine. If you don't have it installed, you can follow the instructions [here](https://nodejs.org/en/download) to install it.
+
+1. Clone the repo
+   ```sh
+   git clone https://github.com/manas-agarwal16/Chess-frontend.git
+   ```
+2. Navigate to the project directory:
+  ```sh
+   cd Chess-frontend
+ ```
+3. Install NPM packages
+   ```sh
+   npm install
+   ```
+4. Run the Application `config.js`
+   ```js
+   npm run dev
+   ```
+
 ## Contributing
 Contributions to Chess Master are welcome! If you encounter any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request.
