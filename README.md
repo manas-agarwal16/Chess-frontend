@@ -9,18 +9,29 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 ## Technologies
 ***ReactJS NodeJS PostgresSQL SequelizeORM Socket.io WebRTC***
 
-
-
 ## ScreenShot
 <div>
-  <img src="./src/assets/registerSS.png" alt="Description" width="400">
-  <img src="./src/assets/verifySS.png" alt="Description" width="400">
-  <img src="./src/assets/loginSS.png" alt="Description" width="400">
+  <img src="./src/assets/registerSS.png" alt="register" width="400">
+  <img src="./src/assets/verifyOtpSS.png" alt="verifyOTP" width="400">
+  <img src="./src/assets/loginSS.png" alt="login" width="400">
 </div>
 
 # Features
 1. Play Online - Chess Master helps you find the perfect opponent with similar ratings, so every game feels challenging and rewarding.
 2. Play with Friend - We also give you the option to connect with any of your friends for a fun and friendly competition.
+
+<div>
+  <img src="./src/assets/homeSS.png" alt="homePage" width="500">
+  <img src="./src/assets/gameSS.png" alt="game" width="500">
+</div>
+
+3. Tracks your progress - Chess Master keeps track of your rating changes and past games, helping you analyze your best moves and mistakes. Learn from every match and improve with real insights.
+
+<div>
+  <img src="./src/assets/profileSS.png" alt="profile" width="500">
+  <img src="./src/assets/historySS.png" alt="history" width="500">
+</div>
+
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
