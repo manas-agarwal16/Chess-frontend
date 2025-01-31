@@ -77,6 +77,7 @@ const PlayGame = () => {
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
 
+  let emitIceCandidate = true;
   //initial PeerConnection
   useEffect(() => {
     if (!peerConnectionRef.current) {
@@ -93,10 +94,13 @@ const PlayGame = () => {
         if (event.candidate) {
           console.log("event.candidate triggered");
 
-          socket.emit("ice-candidate", {
-            candidate: event.candidate,
-            roomName: roomNameRef.current,
-          });
+          if (emitIceCandidate) {
+            emitIceCandidate = false;
+            socket.emit("ice-candidate", {
+              candidate: event.candidate,
+              roomName: roomNameRef.current,
+            });
+          }
         }
       };
     }
@@ -175,7 +179,6 @@ const PlayGame = () => {
       return () => {
         sessionStorage.setItem("resigned", "true");
         if (!roomNameRef.current) {
-
           socket.emit("gameOverClearWaitings", playerData.id);
 
           setTimeout(() => {
@@ -446,7 +449,7 @@ const PlayGame = () => {
       createOffer();
     }
     // Receive offer
-    socket.on("offer", async ({ offer }) => {
+    socket.on("offer", async ({ offer, roomName }) => {
       if (!PeerConnection) return;
       // console.log("Received offer", offer);
 
@@ -463,7 +466,7 @@ const PlayGame = () => {
         // console.log("Answer created and local description set");
 
         socket.emit("answer", {
-          roomName: roomNameRef.current,
+          roomName : roomName,
           answer: PeerConnection.localDescription,
         });
       } catch (error) {
@@ -490,8 +493,21 @@ const PlayGame = () => {
     //ice-candidate
     socket.on("ice-candidate", async ({ candidate }) => {
       if (!PeerConnection) return;
-      // console.log("ice-candidate: ", candidate);
-      await PeerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      console.log("ice-candidate: ", candidate);
+      console.log(
+        "peerConnection signaling state: ",
+        PeerConnection.signalingState
+      );
+      console.log(
+        "peerConnection iceconnection state: ",
+        PeerConnection.iceConnectionState
+      );
+
+      try {
+        await PeerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (error) {
+        console.log("ice-candidate error: ", error);
+      }
     });
 
     return () => {
