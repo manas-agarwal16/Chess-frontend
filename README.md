@@ -12,8 +12,8 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 
 
 ## ScreenShot
-![HomePage](./src/assests/homeSS.png)
-![HomePage](./src/assests/homeSS.png)
+![HomePage](./src/assets/homeSS.png)
+![HomePage](./src/assets/homeSS.png)
 
 # Features
 1. Play Online - Chess Master helps you find the perfect opponent with similar ratings, so every game feels challenging and rewarding.
