@@ -79,9 +79,9 @@ To run the application, you need to have node installed on your machine. If you 
    git clone https://github.com/manas-agarwal16/Chess-frontend.git
    ```
 2. Navigate to the project directory:
-  ```sh
+   ```sh
    cd Chess-frontend
-  ```
+   ```
 3. Install NPM packages
    ```sh
    npm install
