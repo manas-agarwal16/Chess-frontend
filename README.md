@@ -10,55 +10,48 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 ***ReactJS NodeJS PostgresSQL SequelizeORM Socket.io WebRTC***
 
 ### Frontend Tech Stack
-<div style="display: flex; flex-wrap: wrap; align-items: center;">
-  <div style="text-align: center; margin-right: 30px;">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="50" height="50" />
-    <br />
-    React
-  </div>
-  <div style="text-align: center; margin-right: 30px;">
-    <img src="https://www.svgrepo.com/show/303557/redux-logo.svg" width="50" height="50" />
-    <br />
-    Redux
-  </div>
-  <div style="text-align: center; margin-right: 30px;">
-    <img src="https://www.svgrepo.com/show/333609/tailwind-css.svg" width="50" height="50" />
-    <br />
-    Tailwind CSS
-  </div>
-  <div style="text-align: center;">
-    <img src="https://www.svgrepo.com/show/354551/webrtc.svg" width="50" height="50" />
-    <br />
-    WebRTC
-  </div>
+<div style="display: inline-block; text-align: center; margin-right: 30px;">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="50" height="50" />
+  <br />
+  React
+</div>
+<div style="display: inline-block; text-align: center; margin-right: 30px;">
+  <img src="https://www.svgrepo.com/show/303557/redux-logo.svg" width="50" height="50" />
+  <br />
+  Redux
+</div>
+<div style="display: inline-block; text-align: center; margin-right: 30px;">
+  <img src="https://www.svgrepo.com/show/333609/tailwind-css.svg" width="50" height="50" />
+  <br />
+  Tailwind CSS
+</div>
+<div style="display: inline-block; text-align: center;">
+  <img src="https://www.svgrepo.com/show/354551/webrtc.svg" width="50" height="50" />
+  <br />
+  WebRTC
 </div>
 
 ### Backend Tech Stack
-<div style="display: flex; flex-wrap: wrap; align-items: center;">
-  <div style="text-align: center; margin-right: 30px;">
-    <img src="https://www.svgrepo.com/show/303360/nodejs-logo.svg" width="50" height="50" />
-    <br />
-    Node.js
-  </div>
-  <div style="text-align: center; margin-right: 30px;">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" width="50" height="50" />
-    <br />
-    PostgreSQL
-  </div>
-  <div style="text-align: center; margin-right: 30px;">
-    <img src="https://github.com/user-attachments/assets/c857fb6c-1f5c-455f-a010-682a51f21d7c" width="50" height="50" />
-    <br />
-    Sequelize
-  </div>
-  <div style="text-align: center;">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Socket-io.svg/900px-Socket-io.svg.png?20200308235956" width="50" height="50" />
-    <br />
-    Socket.IO
-  </div>
+<div style="display: inline-block; text-align: center; margin-right: 30px;">
+  <img src="https://www.svgrepo.com/show/303360/nodejs-logo.svg" width="50" height="50" />
+  <br />
+  Node.js
 </div>
-
-
-
+<div style="display: inline-block; text-align: center; margin-right: 30px;">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" width="50" height="50" />
+  <br />
+  PostgreSQL
+</div>
+<div style="display: inline-block; text-align: center; margin-right: 30px;">
+  <img src="https://github.com/user-attachments/assets/c857fb6c-1f5c-455f-a010-682a51f21d7c" width="50" height="50" />
+  <br />
+  Sequelize
+</div>
+<div style="display: inline-block; text-align: center;">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Socket-io.svg/900px-Socket-io.svg.png?20200308235956" width="50" height="50" />
+  <br />
+  Socket.IO
+</div>
 
 ## ScreenShot
 <table>
