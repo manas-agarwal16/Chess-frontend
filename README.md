@@ -3,10 +3,13 @@
 **Chess Master** is a platform built for chess enthusiasts who want to improve their skills and connect with others while playing. It’s not just about winning—it’s about growing together.
 
 # Technologies
-![React](https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg)
-![Node.js](https://upload.wikimedia.org/wikipedia/commons/6/64/Node.js_logo_2015.svg)
-![PostgreSQL](https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg)
-![Sequelize](https://sequelize.org/images/logo.svg)
+# Tech Stack
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="50" height="50" />
+<img src="https://upload.wikimedia.org/wikipedia/commons/6/64/Node.js_logo_2015.svg" width="50" height="50" />
+<img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" width="50" height="50" />
+<img src="https://sequelize.org/images/logo.svg" width="50" height="50" />
+
 ![Socket.IO](https://upload.wikimedia.org/wikipedia/commons/2/2f/Socket-io.svg)
 ![WebRTC](https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/WebRTC_logo.svg/1024px-WebRTC_logo.svg.png)
 
