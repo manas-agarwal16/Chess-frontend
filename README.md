@@ -11,9 +11,9 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 
 ## ScreenShot
 <div>
-  <img src="./src/assets/registerSS.png" alt="register" width="400">
-  <img src="./src/assets/verifyOtpSS.png" alt="verifyOTP" width="400">
-  <img src="./src/assets/loginSS.png" alt="login" width="400">
+  <img src="./src/assets/registerSS.png" alt="register" width="300">
+  <img src="./src/assets/verifyOtpSS.png" alt="verifyOTP" width="300">
+  <img src="./src/assets/loginSS.png" alt="login" width="300">
 </div>
 
 # Features
