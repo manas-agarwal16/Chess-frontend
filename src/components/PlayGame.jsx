@@ -1,4 +1,4 @@
-//Errors: no opponent resign msg, direct calculating ratings, need to use setTimeOut i guess.
+//webRTC not working for the first time it connects.
 
 import React, {
   useEffect,
@@ -90,21 +90,21 @@ const PlayGame = () => {
       });
       peerConnectionRef.current = PeerConnection;
 
-      PeerConnection.onicecandidate = (event) => {
-        console.log("got ice-candidate of the user");
+      // PeerConnection.onicecandidate = (event) => {
+      //   console.log("got ice-candidate of the user");
 
-        if (event.candidate) {
-          console.log("event.candidate triggered");
+      //   if (event.candidate) {
+      //     console.log("event.candidate triggered");
 
-          if (emitIceCandidate) {
-            emitIceCandidate = false;
-            socket.emit("ice-candidate", {
-              candidate: event.candidate,
-              roomName: roomNameRef.current,
-            });
-          }
-        }
-      };
+      //     if (emitIceCandidate && roomNameRef.current) {
+      //       emitIceCandidate = false;
+      //       socket.emit("ice-candidate", {
+      //         candidate: event.candidate,
+      //         roomName: roomNameRef.current,
+      //       });
+      //     }
+      //   }
+      // };
     }
   }, []);
 
@@ -132,6 +132,22 @@ const PlayGame = () => {
         stream.getTracks().forEach((track) => {
           peerConnectionRef.current.addTrack(track, stream);
         });
+
+        const PeerConnection = peerConnectionRef.current;
+        PeerConnection.onicecandidate = (event) => {
+          console.log("got ice-candidate of the user");
+
+          if (event.candidate) {
+            console.log("event.candidate triggered");
+            if (emitIceCandidate && roomNameRef.current) {
+              emitIceCandidate = false;
+              socket.emit("ice-candidate", {
+                candidate: event.candidate,
+                roomName: roomNameRef.current,
+              });
+            }
+          }
+        };
       })
       .catch((error) => console.error("Error accessing media devices:", error));
   }, []);
@@ -737,7 +753,10 @@ const PlayGame = () => {
     console.log("handleMuteAudio called");
     console.log("remoteStream: ", remoteStreamRef.current);
 
-    if (remoteStreamRef.current && remoteStreamRef.current.getAudioTracks().length > 0) {
+    if (
+      remoteStreamRef.current &&
+      remoteStreamRef.current.getAudioTracks().length > 0
+    ) {
       remoteStreamRef.current.getAudioTracks()[0].enabled = false;
       console.log("Remote audio muted");
     } else {
@@ -745,13 +764,14 @@ const PlayGame = () => {
     }
   }, []);
 
-  socket.on("muteAudio", () => {
-    handleMuteAudio();
-  });
+  socket.on("muteAudio", handleMuteAudio);
 
   const handleUnmuteAudio = useCallback(() => {
     console.log("handleUnmuteAudio called");
-    if (remoteStreamRef.current && remoteStreamRef.current.getAudioTracks().length > 0) {
+    if (
+      remoteStreamRef.current &&
+      remoteStreamRef.current.getAudioTracks().length > 0
+    ) {
       remoteStreamRef.current.getAudioTracks()[0].enabled = true;
       console.log("Remote audio unmuted");
     } else {
@@ -766,9 +786,7 @@ const PlayGame = () => {
     setSelfMute(false);
   };
 
-  socket.on("unmuteAudio", () => {
-    handleUnmuteAudio();
-  });
+  socket.on("unmuteAudio", handleUnmuteAudio);
 
   return (
     <>
