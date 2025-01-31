@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/a009fd21-e381-4caf-ab15-067431ca34da)# Chess Master - A Chess Learning Playform
+# Chess Master - A Chess Learning Playform
 
 ## About Chess Master
 **Chess Master** is a platform built for chess enthusiasts who want to improve their skills and connect with others while playing. It’s not just about winning—it’s about growing together.
@@ -8,16 +8,18 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 
 ## Tech Stack
 ***ReactJS NodeJS PostgresSQL SequelizeORM Socket.io WebRTC***
-# Tech Stack
-# Tech Stack
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="50" height="50" />
-<img src="https://www.svgrepo.com/show/303360/nodejs-logo.svg" width="50" height="50" />
-<img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" width="50" height="50" />
-<img src="https://github.com/user-attachments/assets/c857fb6c-1f5c-455f-a010-682a51f21d7c" width="50" height="50" />
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Socket-io.svg/900px-Socket-io.svg.png?20200308235956" width="50" height="50" />
-<img src="https://www.svgrepo.com/show/354551/webrtc.svg" width="50" height="50" />
+### Frontend Tech Stack
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="50" height="50" style="display: inline-block;" />
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg](https://www.svgrepo.com/show/303557/redux-logo.svg" width="50" height="50" style="display: inline-block;" />
+<img src="https://www.svgrepo.com/show/333609/tailwind-css.svg" width="50" height="50" style="display: inline-block;" />
+<img src="https://www.svgrepo.com/show/354551/webrtc.svg" width="50" height="50" style="display: inline-block;" />
 
+### Backend Tech Stack
+<img src="https://www.svgrepo.com/show/303360/nodejs-logo.svg" width="50" height="50" style="display: inline-block;" />
+<img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" width="50" height="50" style="display: inline-block;" />
+<img src="https://github.com/user-attachments/assets/c857fb6c-1f5c-455f-a010-682a51f21d7c" width="50" height="50" style="display: inline-block;" />
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Socket-io.svg/900px-Socket-io.svg.png?20200308235956" width="50" height="50" style="display: inline-block;" />
 
 ## ScreenShot
 <table>
