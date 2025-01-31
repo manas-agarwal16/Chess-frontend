@@ -77,6 +77,8 @@ const PlayGame = () => {
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
 
+  const remoteStreamRef = useRef(null);
+
   let emitIceCandidate = true;
   //initial PeerConnection
   useEffect(() => {
@@ -108,8 +110,13 @@ const PlayGame = () => {
 
   //listening to remoteStream
   const handleRemoteStream = useCallback((event) => {
+    console.log("handleRemoteStream called");
+
     const streams = event.streams;
-    setRemoteStream(() => streams[0]); //video stream
+    console.log("streams[0]: ", streams[0]);
+
+    remoteStreamRef.current = streams[0];
+    setRemoteStream(streams[0]); //video stream
   }, []);
 
   //access localStream send localStream to peerConnection
@@ -466,7 +473,7 @@ const PlayGame = () => {
         // console.log("Answer created and local description set");
 
         socket.emit("answer", {
-          roomName : roomName,
+          roomName: roomName,
           answer: PeerConnection.localDescription,
         });
       } catch (error) {
@@ -726,14 +733,31 @@ const PlayGame = () => {
     setSelfMute(true);
   };
 
-  socket.on("muteAudio", () => {
-    if (remoteStream && remoteStream.getAudioTracks().length > 0) {
-      remoteStream.getAudioTracks()[0].enabled = false;
+  const handleMuteAudio = useCallback(() => {
+    console.log("handleMuteAudio called");
+    console.log("remoteStream: ", remoteStreamRef.current);
+
+    if (remoteStreamRef.current && remoteStreamRef.current.getAudioTracks().length > 0) {
+      remoteStreamRef.current.getAudioTracks()[0].enabled = false;
       console.log("Remote audio muted");
     } else {
-      console.log("remoteStream is null or has no audio tracks");
+      console.log("remoteStreamRef.current is null or has no audio tracks");
     }
+  }, []);
+
+  socket.on("muteAudio", () => {
+    handleMuteAudio();
   });
+
+  const handleUnmuteAudio = useCallback(() => {
+    console.log("handleUnmuteAudio called");
+    if (remoteStreamRef.current && remoteStreamRef.current.getAudioTracks().length > 0) {
+      remoteStreamRef.current.getAudioTracks()[0].enabled = true;
+      console.log("Remote audio unmuted");
+    } else {
+      console.log("remoteStreamRef.current is null or has no audio tracks");
+    }
+  }, []);
 
   //unmute opponent remoteStream
   const unmuteAudio = () => {
@@ -743,12 +767,7 @@ const PlayGame = () => {
   };
 
   socket.on("unmuteAudio", () => {
-    if (remoteStream && remoteStream.getAudioTracks().length > 0) {
-      remoteStream.getAudioTracks()[0].enabled = true;
-      console.log("Remote audio unmuted");
-    } else {
-      console.log("remoteStream is null or has no audio tracks");
-    }
+    handleUnmuteAudio();
   });
 
   return (
