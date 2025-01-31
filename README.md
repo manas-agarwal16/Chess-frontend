@@ -6,9 +6,10 @@
 ### Purpose
 Chess is more than just a game; it’s a journey of mastering patterns, strategies, and problem-solving. But what truly accelerates improvement is sharing ideas, discussing moves, and learning from one another. That’s where Chess Master comes in. We let you communicate live with your opponent during games, so you can exchange thoughts, share strategies, and support each other. Whether you're playing a friendly match with a friend or inviting your trainer for a game, Chess Master brings you closer to your goals as a team.
 
-## Tech Stack
-***ReactJS NodeJS PostgresSQL SequelizeORM Socket.io WebRTC***
+### Backend Repository
+![Backend Repository](https://github.com/manas-agarwal16/Chess-backend)
 
+## Tech Stack
 ### Frontend Tech Stack
 <div style="display: flex; flex-wrap: wrap; gap: 20px;">
   &nbsp;&nbsp;&nbsp;
