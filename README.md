@@ -1,4 +1,4 @@
-# Chess Master - A Chess Learning Playform
+![image](https://github.com/user-attachments/assets/a009fd21-e381-4caf-ab15-067431ca34da)# Chess Master - A Chess Learning Playform
 
 ## About Chess Master
 **Chess Master** is a platform built for chess enthusiasts who want to improve their skills and connect with others while playing. It’s not just about winning—it’s about growing together.
@@ -6,8 +6,17 @@
 ### Purpose
 Chess is more than just a game; it’s a journey of mastering patterns, strategies, and problem-solving. But what truly accelerates improvement is sharing ideas, discussing moves, and learning from one another. That’s where Chess Master comes in. We let you communicate live with your opponent during games, so you can exchange thoughts, share strategies, and support each other. Whether you're playing a friendly match with a friend or inviting your trainer for a game, Chess Master brings you closer to your goals as a team.
 
-## Technologies
+## Tech Stack
 ***ReactJS NodeJS PostgresSQL SequelizeORM Socket.io WebRTC***
+# Tech Stack
+
+![React](https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg)
+![Node.js](https://www.svgrepo.com/show/303360/nodejs-logo.svg)
+![PostgreSQL](https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg)
+![Sequelize](https://github.com/user-attachments/assets/c857fb6c-1f5c-455f-a010-682a51f21d7c)
+![Socket.IO](https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Socket-io.svg/900px-Socket-io.svg.png?20200308235956)
+![WebRTC](https://www.svgrepo.com/show/354551/webrtc.svg)
+
 
 ## ScreenShot
 <table>
