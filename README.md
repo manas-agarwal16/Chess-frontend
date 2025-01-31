@@ -74,19 +74,19 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 
 To run the application, you need to have node installed on your machine. If you don't have it installed, you can follow the instructions [here](https://nodejs.org/en/download) to install it.
 
-1. Clone the repository </br>
+1. Clone the repository  
    ```sh
    git clone https://github.com/manas-agarwal16/Chess-frontend.git
    ```
-3. Navigate to the project directory: </br>
+2. Navigate to the project directory:  
    ```sh
    cd Chess-frontend
    ```
-4. Install NPM packages </br>
+3. Install NPM packages  
    ```sh
    npm install
    ```
-5. Run the Application </br>
+4. Run the Application  
    ```js
    npm run dev
    ```
