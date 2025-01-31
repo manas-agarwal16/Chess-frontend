@@ -12,6 +12,7 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 
 
 ## ScreenShot
+<img src="./src/assets/homeSS.png" alt="Description" width="500">
 ![HomePage](./src/assets/homeSS.png)
 ![HomePage](./src/assets/homeSS.png)
 
