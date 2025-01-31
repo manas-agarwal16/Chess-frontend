@@ -10,7 +10,7 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 ***ReactJS NodeJS PostgresSQL SequelizeORM Socket.io WebRTC***
 
 ## ScreenShot
-<div>
+<div style="border: 2px solid white">
   <img src="./src/assets/registerSS.png" alt="register" width="400">
   <img src="./src/assets/verifyOtpSS.png" alt="verifyOTP" width="400">
   <img src="./src/assets/loginSS.png" alt="login" width="400">
