@@ -16,6 +16,7 @@ import { CenterSpinner, Input, Button, LoadingBars } from "./index.js";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import { updatePlayerRating } from "../store/features/gameSlice.js";
+import { use } from "react";
 
 const PlayGame = () => {
   const socket = useMemo(
@@ -151,7 +152,7 @@ const PlayGame = () => {
         };
       })
       .catch((error) => console.error("Error accessing media devices:", error));
-  }, []);
+  }, [setLocalStream]);
 
   //listen to remote stream
   useEffect(() => {
@@ -340,22 +341,37 @@ const PlayGame = () => {
     };
   }, []);
 
-  socket.on("userDisconnectedSuccessfully", (playerId) => {
-    // console.log("17-01-2025 playerId: ", playerId);
+  //userDisconnectedSuccessfully
+  const handleUserDisconnected = useCallback((playerId) => {
+    console.log("handleUserDisconnected called");
+
     if (checkmate || draw) {
       socket.disconnect();
     } else {
-      if (you.id == todoId) {
+      if (youRef.current.id == todoIdRef.current) {
         console.log("updating todoId and leaving the game");
         socket.emit("updateTodoId", { id: opponent.id, roomName });
       }
       handleResignGame({ roomName, playerId: opponent.id });
       socket.disconnect();
     }
-  });
+  }, []);
 
-  //play with stranger , createRoom , joinRoom
-  socket.on("connect", () => {
+  useEffect(() => {
+    const callHandleUserDisconnected = async (playerId) => {
+      await handleUserDisconnected(playerId);
+    };
+
+    socket.on("userDisconnectedSuccessfully", callHandleUserDisconnected);
+
+    return () => {
+      socket.off("userDisconnectedSuccessfully", callHandleUserDisconnected);
+    };
+  }, [handleUserDisconnected]);
+
+  //when user connects
+
+  const userConnected = useCallback(() => {
     if (mode === "online") {
       setGameLoading(() => true);
       socket.emit("playWithStranger", playerData.id);
@@ -367,7 +383,18 @@ const PlayGame = () => {
         setEnterCode(() => true);
       }
     }
-  });
+  }, [setGameLoading, setEnterCode, mode]);
+
+  useEffect(() => {
+    const callUserConnected = async () => {
+      await userConnected();
+    };
+    socket.on("connect", callUserConnected);
+
+    return () => {
+      socket.off("connect", callUserConnected);
+    };
+  }, [userConnected]);
 
   socket.on("updateTodoIdFromBackend", (id) => {
     setTodoId(() => id);
@@ -404,36 +431,65 @@ const PlayGame = () => {
     console.log("Waiting for a player to join: ", roomName);
   });
 
+  const handleStartGame = useCallback(
+    async (players) => {
+      console.log("handleStartGame called");
+
+      await sendLocalStream();
+
+      roomNameRef.current = players.roomName;
+      todoIdRef.current = players.todoId;
+      opponentRef.current =
+        players.player1.id === playerData.id
+          ? players.player2
+          : players.player1;
+
+      youRef.current =
+        players.player1.id === playerData.id
+          ? players.player1
+          : players.player2;
+      setTodoId(players.todoId);
+      setAskToEnterCode(() => false);
+      setEnterCode(() => false);
+      setRoomName(() => players.roomName);
+      setColor(() =>
+        players.player1.id === playerData.id
+          ? players.player1.color
+          : players.player2.color
+      );
+      setYou(() =>
+        players.player1.id === playerData.id ? players.player1 : players.player2
+      );
+      setOpponent(() =>
+        players.player1.id === playerData.id ? players.player2 : players.player1
+      );
+
+      setGameLoading(() => false);
+    },
+    [
+      sendLocalStream,
+      setTodoId,
+      setAskToEnterCode,
+      setEnterCode,
+      setRoomName,
+      setColor,
+      setYou,
+      setOpponent,
+      setGameLoading,
+    ]
+  );
+
   //start the game
-  socket.on("startTheGame", async (players) => {
-    //audio access
-    await sendLocalStream();
+  useEffect(() => {
+    const callHandleStartGame = async (players) => {
+      await handleStartGame(players);
+    };
 
-    roomNameRef.current = players.roomName;
-    todoIdRef.current = players.todoId;
-    opponentRef.current =
-      players.player1.id === playerData.id ? players.player2 : players.player1;
-
-    youRef.current =
-      players.player1.id === playerData.id ? players.player1 : players.player2;
-    setTodoId(players.todoId);
-    setAskToEnterCode(() => false);
-    setEnterCode(() => false);
-    setRoomName(() => players.roomName);
-    setColor(() =>
-      players.player1.id === playerData.id
-        ? players.player1.color
-        : players.player2.color
-    );
-    setYou(() =>
-      players.player1.id === playerData.id ? players.player1 : players.player2
-    );
-    setOpponent(() =>
-      players.player1.id === playerData.id ? players.player2 : players.player1
-    );
-
-    setGameLoading(() => false);
-  });
+    socket.on("startTheGame", callHandleStartGame);
+    return () => {
+      socket.off("startTheGame", callHandleStartGame);
+    };
+  }, [handleStartGame]);
 
   useEffect(() => {
     if (!peerConnectionRef.current) return;
@@ -523,14 +579,28 @@ const PlayGame = () => {
   }, [todoIdRef?.current]);
 
   //backend makeMove
-  socket.on("makeMove", (newPosition) => {
-    setPosition(() => newPosition);
-    setGame(() => new Chess(newPosition));
-  });
+  const handleMakeMove = useCallback(
+    (newPosition) => {
+      console.log("handleMakeMove called");
+
+      setPosition(() => newPosition);
+      setGame(() => new Chess(newPosition));
+    },
+    [setPosition, setGame]
+  );
+
+  useEffect(() => {
+    const callHandleMakeMove = async (newPosition) => {
+      handleMakeMove(newPosition);
+    };
+    socket.on("makeMove", callHandleMakeMove);
+    return () => {
+      socket.off("makeMove", callHandleMakeMove);
+    };
+  }, [handleMakeMove]);
 
   // backend itsCheckmate
-  socket.on(
-    "itsCheckmate",
+  const handleCheckmate = useCallback(
     ({
       player1RatingBefore,
       player1RatingAfter,
@@ -539,6 +609,8 @@ const PlayGame = () => {
       player1Id,
       player2Id,
     }) => {
+      console.log("checkmate from backend");
+
       setYouNewRatinng(() =>
         you.id === player1Id ? player1RatingAfter : player2RatingAfter
       );
@@ -559,12 +631,37 @@ const PlayGame = () => {
       // setGameLoading(() => false);
       setCalculation(() => false);
       socket.disconnect();
-    }
+    },
+    [setYouNewRatinng, setOpponentNewRating, setCheckmate, setCalculation]
   );
 
+  useEffect(() => {
+    const callHandleCheckmate = async ({
+      player1RatingBefore,
+      player1RatingAfter,
+      player2RatingBefore,
+      player2RatingAfter,
+      player1Id,
+      player2Id,
+    }) => {
+      await handleCheckmate({
+        player1RatingBefore,
+        player1RatingAfter,
+        player2RatingBefore,
+        player2RatingAfter,
+        player1Id,
+        player2Id,
+      });
+    };
+    socket.on("itsCheckmate", callHandleCheckmate);
+
+    return () => {
+      socket.off("itsCheckmate", callHandleCheckmate);
+    };
+  }, [handleCheckmate]);
+
   //backend itsDraw
-  socket.on(
-    "itsDraw",
+  const handleDraw = useCallback(
     ({
       player1RatingBefore,
       player1RatingAfter,
@@ -593,14 +690,40 @@ const PlayGame = () => {
       // setGameLoading(() => false);
       setCalculation(() => false);
       socket.disconnect();
-    }
+    },
+    [setYouNewRatinng, setOpponentNewRating, setDraw, setCalculation]
   );
 
-  //backend
+  useEffect(() => {
+    const callHandleDraw = async ({
+      player1RatingBefore,
+      player1RatingAfter,
+      player2RatingBefore,
+      player2RatingAfter,
+      player1Id,
+      player2Id,
+    }) => {
+      await handleDraw({
+        player1RatingBefore,
+        player1RatingAfter,
+        player2RatingBefore,
+        player2RatingAfter,
+        player1Id,
+        player2Id,
+      });
+    };
+    socket.on("itsDraw", callHandleDraw);
 
+    return () => {
+      socket.off("itsDraw", callHandleDraw);
+    };
+  }, [handleDraw]);
+
+  //backend
   const functionResignedGame = useCallback(
     ({ roomName, playerId }) => {
       console.log("resignedGame called");
+      setResignGameMsg(() => false);
 
       if (youRef.current?.id != null && opponentRef.current?.id != null) {
         if (youRef.current.id === playerId) {
@@ -638,6 +761,7 @@ const PlayGame = () => {
       youRef,
       opponentRef,
       todoIdRef,
+      setResignGameMsg,
     ]
   );
 
@@ -740,7 +864,7 @@ const PlayGame = () => {
       roomName: roomNameRef.current,
       playerId: playerData.id,
     });
-  }, []);
+  }, [setResignGameMsg]);
 
   const handleCleanUp = () => {
     socket.emit("userDisconnected", { playerId: playerData.id, roomName });
@@ -753,15 +877,9 @@ const PlayGame = () => {
   const [oppMute, setOppMute] = useState(false);
 
   //mute opponent remoteStream
-  const muteAudio = async () => {
-    socket.emit("muteAudio", { roomName });
-    setSelfMute(true);
-  };
 
   const handleMuteAudio = useCallback(() => {
     console.log("handleMuteAudio called");
-    console.log("remoteStream: ", remoteStreamRef.current);
-
     if (
       remoteStreamRef.current &&
       remoteStreamRef.current.getAudioTracks().length > 0
@@ -773,7 +891,23 @@ const PlayGame = () => {
     }
   }, []);
 
-  socket.on("muteAudio", handleMuteAudio);
+  useEffect(() => {
+    const callMuteAudio = async () => {
+      await handleMuteAudio();
+    };
+    socket.on("muteAudio", callMuteAudio);
+
+    return () => {
+      socket.off("muteAudio", callMuteAudio);
+    };
+  }, [handleMuteAudio]);
+
+  const muteAudio = async () => {
+    socket.emit("muteAudio", { roomName });
+    setSelfMute(true);
+  };
+
+  // socket.on("muteAudio", handleMuteAudio);
 
   const handleUnmuteAudio = useCallback(() => {
     console.log("handleUnmuteAudio called");
@@ -795,7 +929,18 @@ const PlayGame = () => {
     setSelfMute(false);
   };
 
-  socket.on("unmuteAudio", handleUnmuteAudio);
+  useEffect(() => {
+    const callHandleUnmuteAudio = async () => {
+      await handleUnmuteAudio();
+    };
+    socket.on("unmuteAudio", callHandleUnmuteAudio);
+
+    return () => {
+      socket.off("unmuteAudio", callHandleUnmuteAudio);
+    };
+  }, [handleUnmuteAudio]);
+
+  // socket.on("unmuteAudio", handleUnmuteAudio);
 
   return (
     <>
