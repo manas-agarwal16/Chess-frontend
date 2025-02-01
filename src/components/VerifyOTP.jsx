@@ -37,7 +37,6 @@ const VerifyOTP = () => {
       navigate("/");
     } else {
       reset();
-      dispatch(resendOTP({ email }));
     }
   };
 
