@@ -8,10 +8,8 @@
 <table>
   <tr>
     <td>
-      <video width="320" height="240" controls>
-        <source src="https://www.youtube.com/watch?v=isLbUbTW1G8" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+      <iframe width="320" height="240" src="https://www.youtube.com/embed/isLbUbTW1G8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
     </td>
   </tr>
 </table>
