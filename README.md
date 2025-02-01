@@ -8,7 +8,7 @@
     <td>
 <!--       [![Video Demo](./src/assets/chessMaster_youtube_thumbnail.png)](https://www.youtube.com/watch?v=isLbUbTW1G8) -->
       <a href="https://www.youtube.com/watch?v=isLbUbTW1G8">
-        <img src="./src/assets/chessMaster_youtube_thumbnail.png" width="1000" height="300" alt="register">
+        <img src="./src/assets/chessMaster_youtube_thumbnail.png" width="900" height="400" alt="register">
       </a>
     </td>
   </tr>
