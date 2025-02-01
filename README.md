@@ -3,6 +3,17 @@
 ## About Chess Master
 **Chess Master** is a platform built for chess enthusiasts who want to improve their skills and connect with others while playing. It’s not just about winning—it’s about growing together.  
 </br>
+
+## Video demo
+<table>
+  <tr>
+    <td>
+      <iframe width="320" height="240" src="https://www.youtube.com/embed/isLbUbTW1G8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+    </td>
+  </tr>
+</table>
+
 **Website Link**: &nbsp;[https://chessmaster-manas.vercel.app/](https://chessmaster-manas.vercel.app/)
 </br>
 </br>
