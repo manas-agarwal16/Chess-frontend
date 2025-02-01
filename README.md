@@ -8,10 +8,7 @@
 <table>
   <tr>
     <td>
-      <video width="320" height="240" controls>
-        <source src="https://drive.google.com/file/d/1n6Aadp1Y-wEymJk1U8X3iR4U4Uu_YYno/view" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
+      <iframe src="https://drive.google.com/file/d/1n6Aadp1Y-wEymJk1U8X3iR4U4Uu_YYno/preview" width="640" height="480"></iframe>
     </td>
   </tr>
 </table>
