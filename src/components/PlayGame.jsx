@@ -679,7 +679,7 @@ const PlayGame = () => {
         from: sourceSquare,
         to: targetSquare,
         promotion: piece[1].toLowerCase() ?? "q", // always promote to a queen for example simplicity
-      });
+      }); 
 
       if (move === null) {
         return false;
