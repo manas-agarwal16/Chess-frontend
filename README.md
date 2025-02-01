@@ -2,15 +2,13 @@
 
 ## About Chess Master
 **Chess Master** is a platform built for chess enthusiasts who want to improve their skills and connect with others while playing. It’s not just about winning—it’s about growing together.  
-</br>
-
 ## Video demo
 <table>
   <tr>
     <td>
 <!--       [![Video Demo](./src/assets/chessMaster_youtube_thumbnail.png)](https://www.youtube.com/watch?v=isLbUbTW1G8) -->
       <a href="https://www.youtube.com/watch?v=isLbUbTW1G8">
-        <img src="./src/assets/chessMaster_youtube_thumbnail.png" height="300" alt="register">
+        <img src="./src/assets/chessMaster_youtube_thumbnail.png" width="1000" height="300" alt="register">
       </a>
     </td>
   </tr>
