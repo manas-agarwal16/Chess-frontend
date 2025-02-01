@@ -8,8 +8,7 @@
 <table>
   <tr>
     <td>
-      <iframe width="320" height="240" src="https://www.youtube.com/embed/isLbUbTW1G8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+      [![Video Demo](./src/assets/chessMaster youtube thumbnail.png)](https://www.youtube.com/watch?v=isLbUbTW1G8)
     </td>
   </tr>
 </table>
