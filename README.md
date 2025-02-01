@@ -8,7 +8,7 @@
 <table>
   <tr>
     <td>
-      [![Video Demo](./src/assets/chessMaster youtube thumbnail.png)](https://www.youtube.com/watch?v=isLbUbTW1G8)
+      [![Video Demo](./src/assets/chessMaster_youtube_thumbnail.png)](https://www.youtube.com/watch?v=isLbUbTW1G8)
     </td>
   </tr>
 </table>
