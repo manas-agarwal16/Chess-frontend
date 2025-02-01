@@ -69,6 +69,7 @@ const PlayGame = () => {
   const drawRef = useRef(null);
   const todoIdRef = useRef(null);
   const opponentRef = useRef({});
+  const youRef = useRef({});
 
   const [squareWidth, setSquareWidth] = useState(70);
   const chessboardRef = useRef(null);
@@ -263,7 +264,7 @@ const PlayGame = () => {
       }
       setTimeout(() => {
         if (you.id === todoId) {
-          // console.log("checkmate from up here");
+          console.log("checkmate from up here");
           socket.emit("checkmate", { roomName, winnerId, losserId });
         }
       }, 2000);
@@ -410,7 +411,11 @@ const PlayGame = () => {
 
     roomNameRef.current = players.roomName;
     todoIdRef.current = players.todoId;
+    opponentRef.current =
+      players.player1.id === playerData.id ? players.player2 : players.player1;
 
+    youRef.current =
+      players.player1.id === playerData.id ? players.player1 : players.player2;
     setTodoId(players.todoId);
     setAskToEnterCode(() => false);
     setEnterCode(() => false);
@@ -426,8 +431,7 @@ const PlayGame = () => {
     setOpponent(() =>
       players.player1.id === playerData.id ? players.player2 : players.player1
     );
-    opponentRef.current =
-      players.player1.id === playerData.id ? players.player2 : players.player1;
+
     setGameLoading(() => false);
   });
 
@@ -593,34 +597,61 @@ const PlayGame = () => {
   );
 
   //backend
-  socket.on("resignedGame", ({ roomName, playerId }) => {
-    // console.log("resignedGame : ", roomName, playerId);
-    if (you.id != (undefined || null) && opponent.id != (undefined || null)) {
-      // console.log("you.id : ", you.id);
-      if (you.id === playerId) {
-        console.log("you resigned the game");
-        setCalculation(() => true);
-      } else {
-        console.log("opponent resigned the game");
-        setOpponentResigned(() => true);
-      }
-      setTimeout(() => {
-        setCalculation(() => true);
-        setOpponentResigned(() => false);
-        setStatus(() => (you.id === playerId ? "Lost" : "Won"));
 
-        if (you.id === todoId) {
-          // console.log("checkmate from down here");
+  const functionResignedGame = useCallback(
+    ({ roomName, playerId }) => {
+      console.log("resignedGame called");
 
-          socket.emit("checkmate", {
-            roomName,
-            winnerId: you.id === playerId ? opponent.id : you.id,
-            losserId: playerId,
-          });
+      if (youRef.current?.id != null && opponentRef.current?.id != null) {
+        if (youRef.current.id === playerId) {
+          console.log("you resigned the game");
+          setCalculation(true);
+        } else {
+          console.log("opponent resigned the game");
+          setOpponentResigned(true);
         }
-      }, 3000);
-    }
-  });
+
+        setTimeout(() => {
+          setCalculation(true);
+          setOpponentResigned(false);
+          setStatus(youRef.current.id === playerId ? "Lost" : "Won");
+
+          if (youRef.current.id === todoIdRef.current) {
+            console.log("checkmate from down here");
+
+            socket.emit("checkmate", {
+              roomName,
+              winnerId:
+                youRef.current.id === playerId
+                  ? opponentRef.current.id
+                  : youRef.current.id,
+              losserId: playerId,
+            });
+          }
+        }, 3000);
+      }
+    },
+    [
+      setCalculation,
+      setOpponentResigned,
+      setStatus,
+      youRef,
+      opponentRef,
+      todoIdRef,
+    ]
+  );
+
+  useEffect(() => {
+    const callFunctionResignedGame = async ({ roomName, playerId }) => {
+      await functionResignedGame({ roomName, playerId });
+    };
+
+    socket.on("resignedGame", callFunctionResignedGame);
+
+    return () => {
+      socket.off("resignedGame", callFunctionResignedGame);
+    };
+  }, [functionResignedGame]);
 
   //custom chess pieces
   const customPieces = useMemo(() => {
@@ -679,7 +710,7 @@ const PlayGame = () => {
         from: sourceSquare,
         to: targetSquare,
         promotion: piece[1].toLowerCase() ?? "q", // always promote to a queen for example simplicity
-      }); 
+      });
 
       if (move === null) {
         return false;
@@ -700,7 +731,7 @@ const PlayGame = () => {
     }
   };
 
-  //working handleResignGame
+  //working handleResignGame running 1 time only
   const handleResignGame = useCallback(() => {
     console.log("resigning the game");
 
