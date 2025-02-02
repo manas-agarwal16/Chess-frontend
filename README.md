@@ -86,7 +86,7 @@ Chess is more than just a game; it’s a journey of mastering patterns, strategi
 
 ## Installation
 
-To run the application, you need to have node installed on your machine. If you don't have it installed, you can follow the instructions [here](https://nodejs.org/en/download) to install it.
+To run the application on your localhost, you need to have node installed on your machine. If you don't have it installed, you can follow the instructions [here](https://nodejs.org/en/download) to install it.
 
 1. Clone the repository  
    </br>
