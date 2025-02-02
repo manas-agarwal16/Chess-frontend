@@ -284,6 +284,18 @@ const PlayerProfile = () => {
     const avatar = e.target.files[0];
     console.log("avatar: ", avatar);
 
+    const validImageTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
+
+    if (!validImageTypes.includes(avatar.type)) {
+      alert("Please select a valid image file (JPEG, PNG, GIF, WebP).");
+      return;
+    }
+
     const avatarAndPresetName = new FormData();
     avatarAndPresetName.append("file", avatar);
     avatarAndPresetName.append(
