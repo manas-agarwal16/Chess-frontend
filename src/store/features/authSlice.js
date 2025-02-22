@@ -27,7 +27,6 @@ export const register = createAsyncThunk(
     console.log("userData.avatar[0] : ", userData.avatar[0]);
 
     if (userData.avatar[0]) {
-
       const avatarAndPresetName = new FormData();
       avatarAndPresetName.append("file", userData.avatar[0]);
       avatarAndPresetName.append(
