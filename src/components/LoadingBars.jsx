@@ -16,7 +16,7 @@ const LoadingDots = () => {
   };
 
   return (
-    <div className="z-100 justify-center items-center h-screen w-full gap-2">
+    <div className="z-100 flex justify-center items-center h-screen w-full gap-2">
       <p className="text-gray-500 text-2xl relative bottom-1 italic">
         Calculating ratings
       </p>

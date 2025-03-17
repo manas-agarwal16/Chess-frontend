@@ -1108,12 +1108,8 @@ const PlayGame = () => {
                 {/* <span className="text-slate-400 inline-block font-semibold text-md">
                   Note:
                 </span>{" "} */}
-                For testing purposes, you can access the website in a new tab
-                using the credentials:
-                <span className="font-medium">
-                  {" "}
-                  Username: test, Password: test.
-                </span>
+                For testing purposes, you can access the website in a new tab by
+                logging in with different credentials.
               </p>
             </>
           )}

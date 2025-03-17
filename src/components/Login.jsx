@@ -50,6 +50,17 @@ const Login = () => {
                 Login
               </h2>
             </div>
+            <p className="text-gray-400 text-sm text-center mx-4">
+              For testing purposes, you can use the following credentials:{" "}
+              <br />
+              <span className="font-medium">Player 1</span> – Username:{" "}
+              <span className="font-medium">test</span>, Password:{" "}
+              <span className="font-medium">test</span> <br />
+              <span className="font-medium">Player 2</span> – Username:{" "}
+              <span className="font-medium">test2</span>, Password:{" "}
+              <span className="font-medium">test2</span>
+            </p>
+
             <form onSubmit={handleSubmit(login)}>
               <div className="mb-3">
                 <label
