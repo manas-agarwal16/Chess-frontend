@@ -1104,6 +1104,17 @@ const PlayGame = () => {
                 Refreshing the page during the game will be treated as a
                 resignation. Please ensure a stable connection.
               </p>
+              <p className="text-gray-400 text-center mx-4 my-10">
+                {/* <span className="text-slate-400 inline-block font-semibold text-md">
+                  Note:
+                </span>{" "} */}
+                For testing purposes, you can access the website in a new tab
+                using the credentials:
+                <span className="font-medium">
+                  {" "}
+                  Username: test, Password: test.
+                </span>
+              </p>
             </>
           )}
           {resignGameMsg && (
