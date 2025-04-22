@@ -5,7 +5,7 @@ console.log("BACKENDURL : ", BACKENDURL);
 
 const axiosInstance = axios.create(); 
 
-axiosInstance.defaults.baseURL = BACKENDURL;
+axiosInstance.defaults.baseURL = BACKENDURL; 
 axiosInstance.defaults.withCredentials = true;
 
 export {axiosInstance};
